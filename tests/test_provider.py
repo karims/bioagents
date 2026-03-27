@@ -10,14 +10,19 @@ def test_provider_from_env_returns_none_without_configuration(monkeypatch) -> No
     monkeypatch.delenv("BIOAGENTS_LLM_BASE_URL", raising=False)
     monkeypatch.delenv("BIOAGENTS_LLM_API_KEY", raising=False)
     monkeypatch.delenv("BIOAGENTS_LLM_MODEL", raising=False)
+    monkeypatch.delenv("BIOAGENTS_OLLAMA_MODEL", raising=False)
+    monkeypatch.delenv("BIOAGENTS_OLLAMA_BASE_URL", raising=False)
+    monkeypatch.delenv("BIOAGENTS_OPENAI_BASE_URL", raising=False)
+    monkeypatch.delenv("BIOAGENTS_OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("BIOAGENTS_OPENAI_MODEL", raising=False)
 
     assert provider_from_env() is None
 
 
 def test_get_provider_from_env_selects_ollama(monkeypatch) -> None:
     monkeypatch.setenv("BIOAGENTS_LLM_PROVIDER", "ollama")
-    monkeypatch.setenv("BIOAGENTS_LLM_MODEL", "llama3.1:8b")
-    monkeypatch.delenv("BIOAGENTS_LLM_BASE_URL", raising=False)
+    monkeypatch.setenv("BIOAGENTS_OLLAMA_MODEL", "llama3.1:8b")
+    monkeypatch.delenv("BIOAGENTS_OLLAMA_BASE_URL", raising=False)
 
     mode, provider = get_provider_from_env()
 
@@ -28,7 +33,7 @@ def test_get_provider_from_env_selects_ollama(monkeypatch) -> None:
 
 def test_invalid_ollama_config_falls_back_cleanly(monkeypatch) -> None:
     monkeypatch.setenv("BIOAGENTS_LLM_PROVIDER", "ollama")
-    monkeypatch.delenv("BIOAGENTS_LLM_MODEL", raising=False)
+    monkeypatch.delenv("BIOAGENTS_OLLAMA_MODEL", raising=False)
 
     mode, provider = get_provider_from_env()
 
@@ -37,6 +42,18 @@ def test_invalid_ollama_config_falls_back_cleanly(monkeypatch) -> None:
 
 
 def test_openai_compatible_mode_selected_when_configured(monkeypatch) -> None:
+    monkeypatch.setenv("BIOAGENTS_LLM_PROVIDER", "openai-compatible")
+    monkeypatch.setenv("BIOAGENTS_OPENAI_BASE_URL", "https://api.example.com/v1")
+    monkeypatch.setenv("BIOAGENTS_OPENAI_API_KEY", "test-key")
+    monkeypatch.setenv("BIOAGENTS_OPENAI_MODEL", "test-model")
+
+    mode, provider = get_provider_from_env()
+
+    assert mode == "openai-compatible"
+    assert provider is not None
+
+
+def test_legacy_env_vars_still_work(monkeypatch) -> None:
     monkeypatch.delenv("BIOAGENTS_LLM_PROVIDER", raising=False)
     monkeypatch.setenv("BIOAGENTS_LLM_BASE_URL", "https://api.example.com/v1")
     monkeypatch.setenv("BIOAGENTS_LLM_API_KEY", "test-key")

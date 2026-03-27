@@ -18,7 +18,7 @@ GitHub Pages setup:
 
 ## TL;DR
 
-- Give it a task + objective  
+- Give it an input, a task type, and an objective  
 - Multiple agents propose ideas from different perspectives  
 - Agents reinforce or challenge each other  
 - Weak ideas fade, strong ones survive  
@@ -65,7 +65,7 @@ bioagents runs a **goal-directed swarm loop** over your input:
 ## Quickstart
 
 ```bash
-python -m pip install -e '.[dev]'
+python -m pip install -e .
 
 bioagents run demos/sample_task.json
 bioagents run demos/document_task.json
@@ -78,8 +78,9 @@ bioagents run demos/sample_task.json --top-k 1
 
 ```json
 {
-  "input": "...",
-  "objective": "identify main risks and suggest improvements",
+  "task_type": "pr_review",
+  "data": "...",
+  "objective": "identify the main risks and suggest the best improvement",
   "config": {
     "top_k": 2
   }
@@ -100,8 +101,8 @@ Using local Ollama from Docker (macOS/Windows):
 ```bash
 docker run --rm \
   -e BIOAGENTS_LLM_PROVIDER=ollama \
-  -e BIOAGENTS_LLM_MODEL=llama3.1:8b \
-  -e BIOAGENTS_LLM_BASE_URL=http://host.docker.internal:11434 \
+  -e BIOAGENTS_OLLAMA_MODEL=llama3.1:8b \
+  -e BIOAGENTS_OLLAMA_BASE_URL=http://host.docker.internal:11434 \
   bioagents
 ```
 
@@ -113,23 +114,25 @@ docker run --rm \
 
 ```bash
 export BIOAGENTS_LLM_PROVIDER=ollama
-export BIOAGENTS_LLM_MODEL=llama3.1:8b
-export BIOAGENTS_LLM_BASE_URL=http://localhost:11434
+export BIOAGENTS_OLLAMA_MODEL=llama3.1:8b
+export BIOAGENTS_OLLAMA_BASE_URL=http://localhost:11434
 ```
 
 ### OpenAI-compatible
 
 ```bash
-export BIOAGENTS_LLM_BASE_URL="https://api.openai.com/v1"
-export BIOAGENTS_LLM_API_KEY="your-key"
-export BIOAGENTS_LLM_MODEL="gpt-4o-mini"
+export BIOAGENTS_LLM_PROVIDER=openai-compatible
+export BIOAGENTS_OPENAI_BASE_URL="https://api.openai.com/v1"
+export BIOAGENTS_OPENAI_API_KEY="your-key"
+export BIOAGENTS_OPENAI_MODEL="gpt-4o-mini"
 ```
 
 ---
 
-## Tests
+## Development
 
 ```bash
+python -m pip install -e '.[dev]'
 pytest
 ```
 

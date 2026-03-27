@@ -76,18 +76,29 @@ class MockProvider:
         return self.response
 
 
+def _get_env(*names: str) -> str | None:
+    for name in names:
+        value = os.getenv(name)
+        if value:
+            return value
+    return None
+
+
 def get_provider_from_env() -> tuple[str, Provider | None]:
     provider_name = os.getenv("BIOAGENTS_LLM_PROVIDER", "").strip().lower()
-    model = os.getenv("BIOAGENTS_LLM_MODEL")
 
     if provider_name == "ollama":
+        model = _get_env("BIOAGENTS_OLLAMA_MODEL", "BIOAGENTS_LLM_MODEL")
         if not model:
             return "fallback", None
-        base_url = os.getenv("BIOAGENTS_LLM_BASE_URL", "http://localhost:11434")
+        base_url = _get_env("BIOAGENTS_OLLAMA_BASE_URL", "BIOAGENTS_LLM_BASE_URL")
+        if not base_url:
+            base_url = "http://localhost:11434"
         return "ollama", OllamaProvider(model=model, base_url=base_url)
 
-    base_url = os.getenv("BIOAGENTS_LLM_BASE_URL")
-    api_key = os.getenv("BIOAGENTS_LLM_API_KEY")
+    base_url = _get_env("BIOAGENTS_OPENAI_BASE_URL", "BIOAGENTS_LLM_BASE_URL")
+    api_key = _get_env("BIOAGENTS_OPENAI_API_KEY", "BIOAGENTS_LLM_API_KEY")
+    model = _get_env("BIOAGENTS_OPENAI_MODEL", "BIOAGENTS_LLM_MODEL")
 
     if not base_url or not api_key or not model:
         return "fallback", None
