@@ -1,6 +1,7 @@
-from bioagents.cli.main import build_demo_agents
 from bioagents.core.agent import Agent, CriticAgent
+from bioagents.core.config import RuntimeConfig
 from bioagents.core.models import Hypothesis, HypothesisSubmission
+from bioagents.core.registry import get_agents
 from bioagents.core.runtime import SwarmRuntime
 from bioagents.core.task import Task
 from bioagents.llm.provider import MockProvider
@@ -34,7 +35,7 @@ def build_runtime() -> SwarmRuntime:
 
 
 def test_runtime_runs_without_env_vars() -> None:
-    runtime = SwarmRuntime(agents=build_demo_agents(provider=None), max_steps=3)
+    runtime = SwarmRuntime.from_config(provider=None)
 
     hypotheses = runtime.run(Task(task_type="pr_review", data="loop over users"))
 
@@ -43,7 +44,7 @@ def test_runtime_runs_without_env_vars() -> None:
 
 
 def test_agents_produce_structured_submissions_without_real_api_calls() -> None:
-    agents = build_demo_agents(provider=MockProvider("missing null check"))
+    agents = get_agents(None, provider=MockProvider("missing null check"))
 
     submissions = agents[0].act(Task(task_type="pr_review", data="profile.email"), board=_EmptyBoard())
 
@@ -104,6 +105,24 @@ def test_runtime_top_k_limits_final_results() -> None:
     hypotheses = runtime.run(Task(task_type="analyze_code", data="dummy input"))
 
     assert len(hypotheses) == 1
+
+
+def test_runtime_respects_config_selected_agents_and_rules() -> None:
+    runtime = SwarmRuntime.from_config(
+        RuntimeConfig(
+            agents=["bug_agent", "performance_agent"],
+            rules=["reinforce"],
+            max_steps=2,
+            top_k=1,
+        ),
+        provider=None,
+    )
+
+    hypotheses = runtime.run(Task(task_type="analyze_code", data="dummy input"))
+
+    assert len(hypotheses) == 1
+    assert hypotheses[0].opposition == 0
+    assert hypotheses[0].support == 2
 
 
 class _EmptyBoard:

@@ -1,4 +1,4 @@
-from bioagents.cli.main import build_demo_agents
+from bioagents.core.registry import get_agents
 from bioagents.core.task import Task
 from bioagents.llm.provider import MockProvider, OllamaProvider, get_provider_from_env, provider_from_env
 
@@ -47,14 +47,14 @@ def test_openai_compatible_mode_selected_when_configured(monkeypatch) -> None:
 
 
 def test_demo_agents_fallback_when_provider_is_unavailable() -> None:
-    agents = build_demo_agents(provider=None)
+    agents = get_agents(None, provider=None)
     submissions = agents[0].act(Task(task_type="pr_review", data="x"), _EmptyBoard())
 
     assert submissions[0].hypothesis.text == "possible bug"
 
 
 def test_demo_agents_use_provider_when_available() -> None:
-    agents = build_demo_agents(provider=MockProvider("unsafe attribute access"))
+    agents = get_agents(None, provider=MockProvider("unsafe attribute access"))
     submissions = agents[0].act(Task(task_type="pr_review", data="x"), _EmptyBoard())
 
     assert submissions[0].hypothesis.text == "unsafe attribute access"

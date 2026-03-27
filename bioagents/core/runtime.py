@@ -2,9 +2,12 @@ from dataclasses import dataclass, field
 
 from bioagents.core.agent import Agent
 from bioagents.core.blackboard import Blackboard
+from bioagents.core.config import RuntimeConfig
 from bioagents.core.models import Hypothesis
+from bioagents.core.registry import get_agents, get_blackboard, resolve_config
 from bioagents.core.selector import HypothesisSelector
 from bioagents.core.task import Task
+from bioagents.llm.provider import Provider
 
 
 @dataclass
@@ -13,6 +16,20 @@ class SwarmRuntime:
     max_steps: int = 3
     top_k: int | None = None
     board: Blackboard = field(default_factory=Blackboard)
+
+    @classmethod
+    def from_config(
+        cls,
+        config: RuntimeConfig | None = None,
+        provider: Provider | None = None,
+    ) -> "SwarmRuntime":
+        resolved = resolve_config(config)
+        return cls(
+            agents=get_agents(resolved.agents, provider=provider),
+            max_steps=resolved.max_steps,
+            top_k=resolved.top_k,
+            board=get_blackboard(resolved.rules),
+        )
 
     def run(self, task: Task) -> list[Hypothesis]:
         for _ in range(self.max_steps):

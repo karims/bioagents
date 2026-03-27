@@ -12,6 +12,7 @@ The project also includes a small pytest-based test suite.
 Bioagents can use Ollama locally, an OpenAI-compatible LLM endpoint, or fallback mode when no LLM env vars are set.
 Task input now uses a small model with `task_type`, `title`, `data`, and optional `metadata`.
 Final outputs are ranked by strength, and you can optionally return only the top results.
+Task JSON can also include runtime config for built-in agents (`bug_agent`, `performance_agent`, `critic_agent`) and rules (`reinforce`, `contradict`, `decay`, `prune`).
 
 ## Run
 
@@ -21,6 +22,8 @@ bioagents run demos/sample_task.json
 bioagents run demos/document_task.json
 bioagents run demos/sample_task.json --top-k 1
 ```
+
+`--top-k` overrides `config.top_k` from the task file when both are present.
 
 LLM env vars:
 
