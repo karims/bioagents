@@ -25,6 +25,7 @@ def load_task(input_file: Path) -> Task:
             rules=config_payload.get("rules"),
             max_steps=config_payload.get("max_steps", 3),
             top_k=config_payload.get("top_k"),
+            similarity_threshold=config_payload.get("similarity_threshold", 0.8),
         )
     return Task(
         task_type=payload.get("task_type", payload.get("task", "task")),

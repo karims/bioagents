@@ -18,6 +18,7 @@ def test_config_model_loads_from_task_json() -> None:
         rules=["reinforce", "contradict", "decay", "prune"],
         max_steps=3,
         top_k=2,
+        similarity_threshold=0.8,
     )
 
 
@@ -64,3 +65,14 @@ def test_cli_top_k_overrides_config_top_k() -> None:
 
     assert result.exit_code == 0
     assert result.stdout.count('"text"') == 1
+
+
+def test_cli_similarity_threshold_overrides_config() -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(
+        app,
+        ["run", "demos/sample_task.json", "--similarity-threshold", "0.6"],
+    )
+
+    assert result.exit_code == 0

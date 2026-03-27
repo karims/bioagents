@@ -15,6 +15,7 @@ class SwarmRuntime:
     agents: list[Agent]
     max_steps: int = 3
     top_k: int | None = None
+    similarity_threshold: float = 0.8
     board: Blackboard = field(default_factory=Blackboard)
 
     @classmethod
@@ -28,6 +29,7 @@ class SwarmRuntime:
             agents=get_agents(resolved.agents, provider=provider),
             max_steps=resolved.max_steps,
             top_k=resolved.top_k,
+            similarity_threshold=resolved.similarity_threshold,
             board=get_blackboard(resolved.rules),
         )
 
@@ -37,4 +39,7 @@ class SwarmRuntime:
                 outputs = agent.act(task, self.board)
                 self.board.add_submissions(outputs)
             self.board.apply_step_rules()
-        return HypothesisSelector(top_k=self.top_k).select(self.board.get_all())
+        return HypothesisSelector(
+            top_k=self.top_k,
+            similarity_threshold=self.similarity_threshold,
+        ).select(self.board.get_all())

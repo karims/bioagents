@@ -16,6 +16,10 @@ app = typer.Typer()
 def run(
     input_file: Path,
     top_k: int | None = typer.Option(default=None, help="Return only the top ranked results."),
+    similarity_threshold: float | None = typer.Option(
+        default=None,
+        help="Merge near-duplicate final hypotheses at or above this similarity threshold.",
+    ),
 ) -> None:
     task = load_task(input_file)
     mode, provider = get_provider_from_env()
@@ -27,6 +31,15 @@ def run(
             rules=config.rules,
             max_steps=config.max_steps,
             top_k=top_k,
+            similarity_threshold=config.similarity_threshold,
+        )
+    if similarity_threshold is not None:
+        config = RuntimeConfig(
+            agents=config.agents,
+            rules=config.rules,
+            max_steps=config.max_steps,
+            top_k=config.top_k,
+            similarity_threshold=similarity_threshold,
         )
     runtime = SwarmRuntime.from_config(config=config, provider=provider)
     hypotheses = runtime.run(task)

@@ -21,6 +21,7 @@ Current capabilities:
 - Explicit provider warnings with fallback on generation failures
 - Constrained prompts for short plain-text outputs
 - Exact-match normalization for whitespace, case, and trailing punctuation
+- Heuristic near-duplicate merging with `difflib` similarity before final ranking
 - Pytest test suite
 
 ## Quickstart
@@ -34,6 +35,7 @@ bioagents run demos/sample_task.json --top-k 1
 
 Task JSON may include a `config` block for agents, rules, `max_steps`, and `top_k`.
 CLI `--top-k` overrides `config.top_k`.
+Final results also merge near-duplicates with heuristic `difflib` similarity.
 
 ## Docker
 
@@ -75,4 +77,4 @@ pytest
 ```
 
 Provider failures fall back explicitly for the current run.
-Normalization is still exact-match oriented and not semantic.
+Similarity merging is heuristic and not embedding-based or semantic.

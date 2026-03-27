@@ -16,6 +16,7 @@ def test_load_task_from_json() -> None:
         rules=["reinforce", "contradict", "decay", "prune"],
         max_steps=3,
         top_k=2,
+        similarity_threshold=0.8,
     )
 
 
