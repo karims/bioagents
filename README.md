@@ -74,6 +74,105 @@ bioagents run demos/sample_task.json --top-k 1
 
 ---
 
+## Example: PR Review
+
+#### Input
+
+We give bioagents a code change (or PR description) and a goal.
+
+Example task JSON:
+
+```json
+{
+  "task_type": "pr_review",
+  "data": "This PR loops over all users and accesses user.profile.email without checking if profile exists.",
+  "objective": "identify the main risks and suggest the best improvement",
+  "config": {
+    "top_k": 2
+  }
+}
+```
+
+---
+
+#### What each field means
+
+* `task_type`
+  The type of problem. This helps select relevant reasoning patterns.
+  Examples: `pr_review`, `document_analysis`, `spreadsheet_analysis`
+
+* `data`
+  The actual input to analyze.
+  This can be code, text, logs, or structured data.
+
+* `objective`
+  The goal for this run.
+  This guides how agents reason and what they prioritize.
+
+* `config.top_k`
+  Number of final results to return after ranking.
+  bioagents may generate many ideas internally, but only the top K are returned.
+
+---
+
+#### What happens internally
+
+bioagents runs a small swarm of specialized agents:
+
+* `bug_agent` -> looks for correctness issues
+* `performance_agent` -> looks for inefficiencies
+* `solution_agent` -> proposes fixes
+* `strategy_agent` -> suggests better approaches
+* `critic_agent` -> challenges weak ideas
+
+They operate in steps:
+
+1. Each agent proposes hypotheses
+2. Agents reinforce or contradict each other
+3. Weak ideas decay, strong ideas gain support
+4. Similar ideas are merged (clustering)
+5. Final results are ranked
+
+This is a bio-inspired process: ideas compete and evolve.
+
+---
+
+#### Example output
+
+```json
+[
+  {
+    "text": "Implement null-safe access for user.profile.email.",
+    "source": "solution_agent",
+    "confidence": 0.53
+  },
+  {
+    "text": "Accessing user.profile.email without checking if profile exists may cause a runtime error.",
+    "source": "bug_agent",
+    "confidence": 0.48
+  }
+]
+```
+
+---
+
+#### Why this is useful
+
+Instead of a single answer, you get:
+
+* multiple perspectives (bugs, performance, strategy)
+* ranked insights
+* both problems and actionable fixes
+
+This makes it useful for:
+
+* PR reviews
+* design analysis
+* document reasoning
+* exploratory problem solving
+
+---
+
 ## Task format
 
 ```json
