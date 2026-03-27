@@ -1,11 +1,13 @@
 from dataclasses import dataclass, field
 
 from bioagents.core.models import Hypothesis
+from bioagents.core.rules import ReinforceOnRepeatRule, Rule
 
 
 @dataclass
 class Blackboard:
     hypotheses: dict[str, Hypothesis] = field(default_factory=dict)
+    rules: list[Rule] = field(default_factory=lambda: [ReinforceOnRepeatRule()])
 
     def _normalize(self, text: str) -> str:
         return text.strip().lower()
@@ -18,10 +20,8 @@ class Blackboard:
             self.hypotheses[key] = hypothesis
             return
 
-        existing.support += 1
-        if hypothesis.source not in existing.sources:
-            existing.sources.append(hypothesis.source)
-        existing.confidence = min(1.0, existing.confidence + 0.05)
+        for rule in self.rules:
+            rule.apply(existing, hypothesis)
 
     def add_hypotheses(self, hypotheses: list[Hypothesis]) -> None:
         for hypothesis in hypotheses:

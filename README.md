@@ -3,7 +3,8 @@
 Minimal Python swarm runtime skeleton.
 
 Hypotheses are structured objects with `text`, `source`, `confidence`, `support`, and `sources`.
-Repeated hypotheses are merged by normalized text, support is tracked, and confidence increases when the same idea reappears.
+Blackboard storage is separate from swarm rules.
+Repeated hypotheses are merged by normalized text, and reinforcement is handled by a local rule so future rules like decay or pruning can be added cleanly.
 
 ## Run
 
