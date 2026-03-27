@@ -17,4 +17,5 @@ class SwarmRuntime:
             for agent in self.agents:
                 outputs = agent.act(context, self.board)
                 self.board.add_hypotheses(outputs)
+            self.board.apply_step_rules()
         return self.board.get_all()

@@ -1,13 +1,20 @@
 from dataclasses import dataclass, field
 
 from bioagents.core.models import Hypothesis
-from bioagents.core.rules import ReinforceOnRepeatRule, Rule
+from bioagents.core.rules import (
+    DecayRule,
+    PruneRule,
+    ReinforceOnRepeatRule,
+    Rule,
+    StepRule,
+)
 
 
 @dataclass
 class Blackboard:
     hypotheses: dict[str, Hypothesis] = field(default_factory=dict)
     rules: list[Rule] = field(default_factory=lambda: [ReinforceOnRepeatRule()])
+    step_rules: list[StepRule] = field(default_factory=lambda: [DecayRule(), PruneRule()])
 
     def _normalize(self, text: str) -> str:
         return text.strip().lower()
@@ -26,6 +33,10 @@ class Blackboard:
     def add_hypotheses(self, hypotheses: list[Hypothesis]) -> None:
         for hypothesis in hypotheses:
             self.add_hypothesis(hypothesis)
+
+    def apply_step_rules(self) -> None:
+        for rule in self.step_rules:
+            rule.apply(self.hypotheses)
 
     def get_all(self) -> list[Hypothesis]:
         return list(self.hypotheses.values())
