@@ -17,7 +17,7 @@ class SwarmRuntime:
     agents: list[Agent]
     max_steps: int = 3
     top_k: int | None = None
-    similarity_threshold: float = 0.8
+    similarity_threshold: float = 0.85
     board: Blackboard = field(default_factory=Blackboard)
 
     @classmethod
@@ -50,7 +50,7 @@ class SwarmRuntime:
             emit(f"objective={task.objective}")
         emit(f"agents={','.join(agent.name for agent in self.agents)}")
         emit(f"steps={self.max_steps}")
-        hypotheses, total_runtime, hypotheses_generated, clusters_final, effective_mode = self._run(
+        hypotheses, total_runtime, hypotheses_generated, clusters_formed, effective_mode = self._run(
             task,
             emit=emit,
             initial_mode=mode,
@@ -59,7 +59,9 @@ class SwarmRuntime:
             emit(f"mode={effective_mode}")
         emit("summary:")
         emit(f"hypotheses_generated={hypotheses_generated}")
-        emit(f"clusters_final={clusters_final}")
+        emit(f"clusters_formed={clusters_formed}")
+        emit(f"final_returned={len(hypotheses)}")
+        emit(f"top_k={self.top_k if self.top_k is not None else 'none'}")
         emit(f"total_runtime={total_runtime:.2f}s")
         return hypotheses
 
@@ -84,7 +86,8 @@ class SwarmRuntime:
                 self.board.add_submissions(outputs)
                 hypotheses_generated += sum(1 for output in outputs if isinstance(output, HypothesisSubmission))
                 if emit is not None:
-                    emit(f"{agent.name} time={agent_runtime:.2f}s")
+                    agent_mode = "llm" if getattr(agent, "provider", None) is not None else "local"
+                    emit(f"{agent.name} mode={agent_mode} time={agent_runtime:.2f}s")
                     warning = getattr(agent, "last_provider_warning", None)
                     if warning is not None:
                         emit(warning)
@@ -98,6 +101,6 @@ class SwarmRuntime:
             top_k=self.top_k,
             similarity_threshold=self.similarity_threshold,
         )
-        merged_hypotheses, clusters_final = selector.prepare(self.board.get_all())
-        ranked = selector.select(merged_hypotheses)
-        return ranked, perf_counter() - total_start, hypotheses_generated, clusters_final, effective_mode
+        merged_hypotheses, clusters_formed = selector.prepare(self.board.get_all())
+        ranked = selector.rank(merged_hypotheses)
+        return ranked, perf_counter() - total_start, hypotheses_generated, clusters_formed, effective_mode

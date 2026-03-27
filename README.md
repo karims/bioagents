@@ -140,12 +140,12 @@ pytest
 
 ## Runtime visibility
 
-Each run prints the active mode, task type, objective, per-agent timings, and a short summary before the final JSON output.
+Each run prints the active mode, task type, objective, per-agent timings, and a short summary before the final JSON output, including formed clusters and final returned results. Local agents also show that they ran without an LLM call.
 
 ---
 
 ## Notes
 
 - Provider failures fall back automatically for the current run  
-- Similarity merging is heuristic (`difflib`), not embedding-based  
+- Similarity merging is heuristic (`difflib`) and intentionally conservative, not embedding-based  
 - Skills are currently descriptive, not executable tools yet  

@@ -2,15 +2,24 @@ from dataclasses import dataclass
 from difflib import SequenceMatcher
 
 from bioagents.core.models import Hypothesis
+from bioagents.core.normalize import normalize_hypothesis_text
 
 
 def similarity(a: str, b: str) -> float:
     return SequenceMatcher(None, a, b).ratio()
 
 
+def _token_overlap(a: str, b: str) -> float:
+    a_tokens = set(normalize_hypothesis_text(a).split())
+    b_tokens = set(normalize_hypothesis_text(b).split())
+    if not a_tokens or not b_tokens:
+        return 0.0
+    return len(a_tokens & b_tokens) / min(len(a_tokens), len(b_tokens))
+
+
 def cluster_hypotheses(
     hypotheses: list[Hypothesis],
-    threshold: float = 0.8,
+    threshold: float = 0.85,
 ) -> list[list[Hypothesis]]:
     clusters: list[list[Hypothesis]] = []
 
@@ -18,7 +27,10 @@ def cluster_hypotheses(
         placed = False
         for cluster in clusters:
             representative = cluster[0]
-            if similarity(hypothesis.text, representative.text) >= threshold:
+            if (
+                similarity(hypothesis.text, representative.text) >= threshold
+                and _token_overlap(hypothesis.text, representative.text) >= 0.5
+            ):
                 cluster.append(hypothesis)
                 placed = True
                 break

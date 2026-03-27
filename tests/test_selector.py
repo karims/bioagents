@@ -81,3 +81,14 @@ def test_cluster_aggregation_sums_fields_and_merges_sources() -> None:
     assert ranked[0].confidence == 0.7
     assert ranked[0].sources == ["a", "b"]
     assert ranked[0].critic_sources == ["critic_a", "critic_b"]
+
+
+def test_clustering_is_more_conservative_for_low_overlap_phrases() -> None:
+    hypotheses = [
+        Hypothesis(text="shipping risk is high because migration lags", source="a"),
+        Hypothesis(text="high confidence fix recommendation for profile guard", source="b"),
+    ]
+
+    ranked = HypothesisSelector(similarity_threshold=0.6).select(hypotheses)
+
+    assert len(ranked) == 2

@@ -186,6 +186,9 @@ def test_cli_telemetry_keeps_final_output_valid_json() -> None:
     assert "mode=fallback" in result.stdout
     assert "step=1" in result.stdout
     assert "summary:" in result.stdout
+    assert "clusters_formed=" in result.stdout
+    assert "final_returned=1" in result.stdout
+    assert "critic_agent mode=local time=" in result.stdout
     json_start = result.stdout.find("[\n")
     payload = json.loads(result.stdout[json_start:])
     assert isinstance(payload, list)
