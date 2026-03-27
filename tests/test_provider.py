@@ -1,5 +1,6 @@
 from bioagents.core.registry import get_agents
 from bioagents.core.task import Task
+from bioagents.llm.prompts import build_bug_prompt
 from bioagents.llm.provider import MockProvider, OllamaProvider, get_provider_from_env, provider_from_env
 
 
@@ -60,6 +61,38 @@ def test_demo_agents_use_provider_when_available() -> None:
     assert submissions[0].hypothesis.text == "unsafe attribute access"
 
 
+def test_provider_failure_surfaces_warning_and_falls_back_cleanly(capsys) -> None:
+    agents = get_agents(None, provider=_FailingProvider())
+
+    submissions = agents[0].act(Task(task_type="pr_review", data="x"), _EmptyBoard())
+
+    captured = capsys.readouterr()
+    assert "provider_warning=ollama generation failed; using fallback" in captured.err
+    assert submissions[0].hypothesis.text == "possible bug"
+
+
+def test_prompts_request_short_plain_output() -> None:
+    prompt = build_bug_prompt(Task(task_type="pr_review", data="x"), _EmptyBoard())
+
+    assert "exactly one short plain sentence" in prompt
+    assert "No markdown, bullets, code, explanation, or quotes." in prompt
+
+
+def test_agent_cleans_generated_text() -> None:
+    agents = get_agents(None, provider=MockProvider('"Unsafe access."\nExtra detail'))
+
+    submissions = agents[0].act(Task(task_type="pr_review", data="x"), _EmptyBoard())
+
+    assert submissions[0].hypothesis.text == "Unsafe access."
+
+
 class _EmptyBoard:
     def get_all(self) -> list[object]:
         return []
+
+
+class _FailingProvider:
+    mode_name = "ollama"
+
+    def generate(self, prompt: str) -> str:
+        raise RuntimeError("boom")

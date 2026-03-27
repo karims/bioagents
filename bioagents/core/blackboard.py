@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 
 from bioagents.core.models import CritiqueSubmission, Hypothesis, HypothesisSubmission, Submission
+from bioagents.core.normalize import normalize_hypothesis_text
 from bioagents.core.rules import (
     ContradictRule,
     CritiqueRule,
@@ -20,7 +21,7 @@ class Blackboard:
     step_rules: list[StepRule] = field(default_factory=lambda: [DecayRule(), PruneRule()])
 
     def _normalize(self, text: str) -> str:
-        return text.strip().lower()
+        return normalize_hypothesis_text(text)
 
     def add_hypothesis(self, hypothesis: Hypothesis) -> None:
         key = self._normalize(hypothesis.text)

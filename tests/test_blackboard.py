@@ -18,6 +18,22 @@ def test_repeated_hypotheses_with_normalized_text_are_merged() -> None:
     assert hypotheses[0].text == "Possible Bug"
 
 
+def test_normalization_merges_spacing_punctuation_and_formatting_artifacts() -> None:
+    board = Blackboard(step_rules=[])
+
+    board.add_submission(
+        HypothesisSubmission(Hypothesis(text="**Possible   Bug!**", source="agent_a"))
+    )
+    board.add_submission(
+        HypothesisSubmission(Hypothesis(text="possible bug", source="agent_b"))
+    )
+
+    hypotheses = board.get_all()
+
+    assert len(hypotheses) == 1
+    assert hypotheses[0].support == 2
+
+
 def test_support_count_increases_on_repeated_submissions() -> None:
     board = Blackboard(step_rules=[])
 

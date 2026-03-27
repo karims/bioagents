@@ -16,7 +16,7 @@ def build_bug_prompt(task: Task, board: Any) -> str:
         f"Title: {task.title or ''}\n"
         f"Input: {task.data}\n"
         f"Board: {_board_summary(board)}\n"
-        "Return exactly one short plain sentence about a possible bug. No markdown. No bullets. No code blocks."
+        "Return exactly one short plain sentence about a possible bug. No markdown, bullets, code, explanation, or quotes."
     )
 
 
@@ -26,7 +26,7 @@ def build_performance_prompt(task: Task, board: Any) -> str:
         f"Title: {task.title or ''}\n"
         f"Input: {task.data}\n"
         f"Board: {_board_summary(board)}\n"
-        "Return exactly one short plain sentence about a performance concern. No markdown. No bullets. No code blocks."
+        "Return exactly one short plain sentence about a performance concern. No markdown, bullets, code, explanation, or quotes."
     )
 
 
@@ -36,5 +36,5 @@ def build_critic_prompt(task: Task, board: Any) -> str:
         f"Title: {task.title or ''}\n"
         f"Input: {task.data}\n"
         f"Board: {_board_summary(board)}\n"
-        "Return exactly one short plain sentence critique. No markdown. No bullets. No code blocks."
+        "Return exactly one short plain sentence critique. No markdown, bullets, code, explanation, or quotes."
     )

@@ -1,11 +1,13 @@
 import json
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol
 from urllib import request
 
 
 class Provider(Protocol):
+    mode_name: str
+
     def generate(self, prompt: str) -> str:
         ...
 
@@ -14,6 +16,7 @@ class Provider(Protocol):
 class OllamaProvider:
     model: str
     base_url: str = "http://localhost:11434"
+    mode_name: str = field(default="ollama", init=False)
 
     def generate(self, prompt: str) -> str:
         body = json.dumps(
@@ -39,6 +42,7 @@ class OpenAICompatibleProvider:
     base_url: str
     api_key: str
     model: str
+    mode_name: str = field(default="openai-compatible", init=False)
 
     def generate(self, prompt: str) -> str:
         body = json.dumps(
@@ -66,6 +70,7 @@ class OpenAICompatibleProvider:
 @dataclass
 class MockProvider:
     response: str
+    mode_name: str = field(default="mock", init=False)
 
     def generate(self, prompt: str) -> str:
         return self.response

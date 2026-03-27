@@ -12,6 +12,7 @@ bioagents/core/agent.py
 bioagents/core/blackboard.py
 bioagents/core/config.py
 bioagents/core/models.py
+bioagents/core/normalize.py
 bioagents/core/registry.py
 bioagents/core/rules.py
 bioagents/core/runtime.py
