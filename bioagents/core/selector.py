@@ -9,9 +9,12 @@ class HypothesisSelector:
     top_k: int | None = None
     similarity_threshold: float = 0.8
 
-    def select(self, hypotheses: list[Hypothesis]) -> list[Hypothesis]:
+    def prepare(self, hypotheses: list[Hypothesis]) -> tuple[list[Hypothesis], int]:
         clusters = cluster_hypotheses(hypotheses, threshold=self.similarity_threshold)
-        hypotheses = [merge_cluster(cluster) for cluster in clusters]
+        return [merge_cluster(cluster) for cluster in clusters], len(clusters)
+
+    def select(self, hypotheses: list[Hypothesis]) -> list[Hypothesis]:
+        hypotheses, _ = self.prepare(hypotheses)
         ranked = sorted(
             hypotheses,
             key=lambda hypothesis: (

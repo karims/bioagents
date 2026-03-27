@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-import sys
 from typing import Any, Callable
 
 from bioagents.core.models import CritiqueSubmission, Hypothesis, HypothesisSubmission, Submission
@@ -16,6 +15,7 @@ class Agent:
     fallback_text: str | None = None
     provider: Provider | None = None
     prompt_builder: Callable[[Task, Any, list[str], list[str]], str] | None = None
+    last_provider_warning: str | None = field(default=None, init=False)
 
     def _clean_generated_text(self, text: str) -> str:
         cleaned = next((line.strip() for line in text.splitlines() if line.strip()), "")
@@ -23,6 +23,8 @@ class Agent:
         return cleaned
 
     def act(self, task: Task, board: Any) -> list[Submission]:
+        self.last_provider_warning = None
+
         if self.outputs:
             return list(self.outputs)
 
@@ -35,8 +37,8 @@ class Agent:
                 )
             except Exception:
                 provider_name = getattr(self.provider, "mode_name", "provider")
-                sys.stderr.write(
-                    f"provider_warning={provider_name} generation failed; using fallback\n"
+                self.last_provider_warning = (
+                    f"provider_warning={provider_name} generation failed; using fallback"
                 )
                 text = ""
             if text:
@@ -56,8 +58,10 @@ class Agent:
 class CriticAgent:
     name: str
     skills: list[str] = field(default_factory=lambda: ["evaluate_risk", "identify_tradeoffs"])
+    last_provider_warning: str | None = field(default=None, init=False)
 
     def act(self, task: Task, board: Any) -> list[Submission]:
+        self.last_provider_warning = None
         hypotheses = board.get_all()
         if not hypotheses:
             return []

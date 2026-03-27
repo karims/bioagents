@@ -23,7 +23,6 @@ def run(
 ) -> None:
     task = load_task(input_file)
     mode, provider = get_provider_from_env()
-    typer.echo(f"mode={mode}", err=True)
     config = task.config or RuntimeConfig()
     if top_k is not None:
         config = RuntimeConfig(
@@ -42,7 +41,7 @@ def run(
             similarity_threshold=similarity_threshold,
         )
     runtime = SwarmRuntime.from_config(config=config, provider=provider)
-    hypotheses = runtime.run(task)
+    hypotheses = runtime.run_with_telemetry(task, mode=mode, emit=typer.echo)
     typer.echo(json.dumps([asdict(hypothesis) for hypothesis in hypotheses], indent=2))
 
 

@@ -1,9 +1,11 @@
 from dataclasses import dataclass, field
+from time import perf_counter
+from typing import Callable
 
 from bioagents.core.agent import Agent
 from bioagents.core.blackboard import Blackboard
 from bioagents.core.config import RuntimeConfig
-from bioagents.core.models import Hypothesis
+from bioagents.core.models import Hypothesis, HypothesisSubmission
 from bioagents.core.registry import get_agents, get_blackboard, resolve_config
 from bioagents.core.selector import HypothesisSelector
 from bioagents.core.task import Task
@@ -34,12 +36,68 @@ class SwarmRuntime:
         )
 
     def run(self, task: Task) -> list[Hypothesis]:
+        return self._run(task)[0]
+
+    def run_with_telemetry(
+        self,
+        task: Task,
+        mode: str,
+        emit: Callable[[str], None],
+    ) -> list[Hypothesis]:
+        emit(f"mode={mode}")
+        emit(f"task_type={task.task_type}")
+        if task.objective:
+            emit(f"objective={task.objective}")
+        emit(f"agents={','.join(agent.name for agent in self.agents)}")
+        emit(f"steps={self.max_steps}")
+        hypotheses, total_runtime, hypotheses_generated, clusters_final, effective_mode = self._run(
+            task,
+            emit=emit,
+            initial_mode=mode,
+        )
+        if effective_mode != mode:
+            emit(f"mode={effective_mode}")
+        emit("summary:")
+        emit(f"hypotheses_generated={hypotheses_generated}")
+        emit(f"clusters_final={clusters_final}")
+        emit(f"total_runtime={total_runtime:.2f}s")
+        return hypotheses
+
+    def _run(
+        self,
+        task: Task,
+        emit: Callable[[str], None] | None = None,
+        initial_mode: str = "fallback",
+    ) -> tuple[list[Hypothesis], float, int, int, str]:
+        total_start = perf_counter()
+        hypotheses_generated = 0
+        effective_mode = initial_mode
+
         for _ in range(self.max_steps):
+            step_start = perf_counter()
+            if emit is not None:
+                emit(f"step={_ + 1}")
             for agent in self.agents:
+                agent_start = perf_counter()
                 outputs = agent.act(task, self.board)
+                agent_runtime = perf_counter() - agent_start
                 self.board.add_submissions(outputs)
+                hypotheses_generated += sum(1 for output in outputs if isinstance(output, HypothesisSubmission))
+                if emit is not None:
+                    emit(f"{agent.name} time={agent_runtime:.2f}s")
+                    warning = getattr(agent, "last_provider_warning", None)
+                    if warning is not None:
+                        emit(warning)
+                        if initial_mode != "fallback":
+                            effective_mode = "mixed"
             self.board.apply_step_rules()
-        return HypothesisSelector(
+            if emit is not None:
+                emit(f"step_time={perf_counter() - step_start:.2f}s")
+
+        selector = HypothesisSelector(
             top_k=self.top_k,
             similarity_threshold=self.similarity_threshold,
-        ).select(self.board.get_all())
+        )
+        merged_hypotheses, clusters_final = selector.prepare(self.board.get_all())
+        ranked = selector.select(merged_hypotheses)
+        return ranked, perf_counter() - total_start, hypotheses_generated, clusters_final, effective_mode

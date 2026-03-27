@@ -103,7 +103,7 @@ def get_provider_from_env() -> tuple[str, Provider | None]:
     if not base_url or not api_key or not model:
         return "fallback", None
 
-    return "openai-compatible", OpenAICompatibleProvider(
+    return "openai", OpenAICompatibleProvider(
         base_url=base_url,
         api_key=api_key,
         model=model,

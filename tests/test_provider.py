@@ -49,7 +49,7 @@ def test_openai_compatible_mode_selected_when_configured(monkeypatch) -> None:
 
     mode, provider = get_provider_from_env()
 
-    assert mode == "openai-compatible"
+    assert mode == "openai"
     assert provider is not None
 
 
@@ -61,7 +61,7 @@ def test_legacy_env_vars_still_work(monkeypatch) -> None:
 
     mode, provider = get_provider_from_env()
 
-    assert mode == "openai-compatible"
+    assert mode == "openai"
     assert provider is not None
 
 
@@ -79,13 +79,12 @@ def test_demo_agents_use_provider_when_available() -> None:
     assert submissions[0].hypothesis.text == "unsafe attribute access"
 
 
-def test_provider_failure_surfaces_warning_and_falls_back_cleanly(capsys) -> None:
+def test_provider_failure_sets_warning_and_falls_back_cleanly() -> None:
     agents = get_agents(None, provider=_FailingProvider())
 
     submissions = agents[0].act(Task(task_type="pr_review", data="x"), _EmptyBoard())
 
-    captured = capsys.readouterr()
-    assert "provider_warning=ollama generation failed; using fallback" in captured.err
+    assert agents[0].last_provider_warning == "provider_warning=ollama generation failed; using fallback"
     assert submissions[0].hypothesis.text == "possible bug"
 
 

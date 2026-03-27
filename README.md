@@ -138,6 +138,12 @@ pytest
 
 ---
 
+## Runtime visibility
+
+Each run prints the active mode, task type, objective, per-agent timings, and a short summary before the final JSON output.
+
+---
+
 ## Notes
 
 - Provider failures fall back automatically for the current run  

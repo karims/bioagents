@@ -1,3 +1,8 @@
+import json
+
+from typer.testing import CliRunner
+
+from bioagents.cli.main import app
 from bioagents.core.agent import Agent, CriticAgent
 from bioagents.core.config import RuntimeConfig
 from bioagents.core.models import Hypothesis, HypothesisSubmission
@@ -170,6 +175,38 @@ def test_runtime_supports_constructive_and_critic_agents_together() -> None:
     )
 
     assert hypotheses
+
+
+def test_cli_telemetry_keeps_final_output_valid_json() -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(app, ["run", "demos/sample_task.json", "--top-k", "1"])
+
+    assert result.exit_code == 0
+    assert "mode=fallback" in result.stdout
+    assert "step=1" in result.stdout
+    assert "summary:" in result.stdout
+    json_start = result.stdout.find("[\n")
+    payload = json.loads(result.stdout[json_start:])
+    assert isinstance(payload, list)
+    assert len(payload) == 1
+
+
+def test_runtime_logs_provider_warning_when_expected() -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(
+        app,
+        ["run", "demos/sample_task.json", "--top-k", "1"],
+        env={
+            "BIOAGENTS_LLM_PROVIDER": "ollama",
+            "BIOAGENTS_OLLAMA_MODEL": "llama3.1:latest",
+            "BIOAGENTS_OLLAMA_BASE_URL": "http://127.0.0.1:9",
+        },
+    )
+
+    assert result.exit_code == 0
+    assert "provider_warning=ollama generation failed; using fallback" in result.stdout
 
 
 class _EmptyBoard:
