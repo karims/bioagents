@@ -2,6 +2,18 @@
 
 **bioagents** is a lightweight, bio-inspired multi-agent reasoning framework where independent agents generate, debate, and converge on the best insights for a given task.
 
+## Project Page
+
+Available at:
+https://<your-username>.github.io/bioagents/
+
+GitHub Pages setup:
+- Go to repo `Settings -> Pages`
+- Choose `Deploy from branch`
+- Select `main`
+- Select `/docs`
+- Save
+
 ---
 
 ## TL;DR
