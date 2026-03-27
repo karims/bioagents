@@ -1,0 +1,8 @@
+{
+  "task_type": "document_review",
+  "title": "Launch memo draft",
+  "data": "The memo says the migration is complete and risk free, but later notes that customer records still sync in nightly batches and some dashboards may lag by several hours.",
+  "metadata": {
+    "team": "platform"
+  }
+}

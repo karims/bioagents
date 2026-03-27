@@ -2,6 +2,7 @@ from bioagents.cli.main import build_demo_agents
 from bioagents.core.agent import Agent, CriticAgent
 from bioagents.core.models import Hypothesis, HypothesisSubmission
 from bioagents.core.runtime import SwarmRuntime
+from bioagents.core.task import Task
 from bioagents.llm.provider import MockProvider
 
 
@@ -35,7 +36,7 @@ def build_runtime() -> SwarmRuntime:
 def test_runtime_runs_without_env_vars() -> None:
     runtime = SwarmRuntime(agents=build_demo_agents(provider=None), max_steps=3)
 
-    hypotheses = runtime.run({"task": "pr_review", "data": "loop over users"})
+    hypotheses = runtime.run(Task(task_type="pr_review", data="loop over users"))
 
     assert hypotheses
     assert all(isinstance(hypothesis, Hypothesis) for hypothesis in hypotheses)
@@ -44,7 +45,7 @@ def test_runtime_runs_without_env_vars() -> None:
 def test_agents_produce_structured_submissions_without_real_api_calls() -> None:
     agents = build_demo_agents(provider=MockProvider("missing null check"))
 
-    submissions = agents[0].act({"task": "pr_review", "data": "profile.email"}, board=_EmptyBoard())
+    submissions = agents[0].act(Task(task_type="pr_review", data="profile.email"), board=_EmptyBoard())
 
     assert len(submissions) == 1
     assert isinstance(submissions[0], HypothesisSubmission)
@@ -54,7 +55,7 @@ def test_agents_produce_structured_submissions_without_real_api_calls() -> None:
 def test_runtime_executes_for_fixed_number_of_steps() -> None:
     runtime = build_runtime()
 
-    hypotheses = runtime.run({"task": "analyze code"})
+    hypotheses = runtime.run(Task(task_type="analyze_code", data="dummy input"))
 
     assert hypotheses[0].support == 3
     assert hypotheses[1].support == 3
@@ -63,7 +64,7 @@ def test_runtime_executes_for_fixed_number_of_steps() -> None:
 def test_runtime_returns_structured_hypothesis_objects() -> None:
     runtime = build_runtime()
 
-    hypotheses = runtime.run({"task": "analyze code"})
+    hypotheses = runtime.run(Task(task_type="analyze_code", data="dummy input"))
 
     assert all(isinstance(hypothesis, Hypothesis) for hypothesis in hypotheses)
 
@@ -71,7 +72,7 @@ def test_runtime_returns_structured_hypothesis_objects() -> None:
 def test_repeated_agent_outputs_converge_through_blackboard_merging() -> None:
     runtime = build_runtime()
 
-    hypotheses = runtime.run({"task": "analyze code"})
+    hypotheses = runtime.run(Task(task_type="analyze_code", data="dummy input"))
 
     assert len(hypotheses) == 2
 
@@ -79,7 +80,7 @@ def test_repeated_agent_outputs_converge_through_blackboard_merging() -> None:
 def test_critic_agent_causes_opposition_on_targeted_hypothesis() -> None:
     runtime = build_runtime()
 
-    hypotheses = runtime.run({"task": "analyze code"})
+    hypotheses = runtime.run(Task(task_type="analyze_code", data="dummy input"))
     targeted = next(h for h in hypotheses if h.text == "possible bug")
 
     assert targeted.opposition == 3

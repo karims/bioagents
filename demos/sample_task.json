@@ -1,4 +1,9 @@
 {
-  "task": "pr_review",
-  "data": "This PR adds a new loop over all users and accesses user.profile.email without checking if profile exists."
+  "task_type": "pr_review",
+  "title": "Null-safe email access in user scan",
+  "data": "This PR adds a loop over all users, fetches user.profile.email without checking whether profile exists, and recalculates the full user summary inside the loop.",
+  "metadata": {
+    "repo": "bioagents/demo",
+    "author": "demo-user"
+  }
 }

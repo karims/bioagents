@@ -20,12 +20,14 @@ Hypotheses can also be challenged by critic agents, which lower confidence on ta
 This creates a minimal support-versus-opposition loop while keeping future rules easy to add.
 The project also includes a small pytest-based test suite.
 Bioagents can use Ollama locally, an OpenAI-compatible LLM endpoint, or fallback mode when no LLM env vars are set.
+Task input now uses a small model with `task_type`, `title`, `data`, and optional `metadata`.
 
 ## Run
 
 ```bash
 python -m pip install -e .
 bioagents run demos/sample_task.json
+bioagents run demos/document_task.json
 ```
 
 LLM env vars:

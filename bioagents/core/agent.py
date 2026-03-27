@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable
 
 from bioagents.core.models import CritiqueSubmission, Hypothesis, HypothesisSubmission, Submission
+from bioagents.core.task import Task
 from bioagents.llm.provider import Provider
 
 
@@ -11,15 +12,15 @@ class Agent:
     outputs: list[Submission] = field(default_factory=list)
     fallback_text: str | None = None
     provider: Provider | None = None
-    prompt_builder: Callable[[dict[str, Any], Any], str] | None = None
+    prompt_builder: Callable[[Task, Any], str] | None = None
 
-    def act(self, context: dict[str, Any], board: Any) -> list[Submission]:
+    def act(self, task: Task, board: Any) -> list[Submission]:
         if self.outputs:
             return list(self.outputs)
 
         if self.provider is not None and self.prompt_builder is not None:
             try:
-                text = self.provider.generate(self.prompt_builder(context, board)).strip()
+                text = self.provider.generate(self.prompt_builder(task, board)).strip()
             except Exception:
                 text = ""
             if text:
@@ -39,7 +40,7 @@ class Agent:
 class CriticAgent:
     name: str
 
-    def act(self, context: dict[str, Any], board: Any) -> list[Submission]:
+    def act(self, task: Task, board: Any) -> list[Submission]:
         hypotheses = board.get_all()
         if not hypotheses:
             return []
