@@ -7,6 +7,13 @@ bioagents.egg-info/dependency_links.txt
 bioagents.egg-info/entry_points.txt
 bioagents.egg-info/requires.txt
 bioagents.egg-info/top_level.txt
+bioagents/agents/__init__.py
+bioagents/agents/base.py
+bioagents/agents/bug.py
+bioagents/agents/critic.py
+bioagents/agents/performance.py
+bioagents/agents/solution.py
+bioagents/agents/strategy.py
 bioagents/cli/main.py
 bioagents/core/agent.py
 bioagents/core/blackboard.py
@@ -23,6 +30,8 @@ bioagents/core/task.py
 bioagents/llm/__init__.py
 bioagents/llm/prompts.py
 bioagents/llm/provider.py
+bioagents/registry/__init__.py
+bioagents/registry/agents.py
 tests/test_blackboard.py
 tests/test_config.py
 tests/test_provider.py
