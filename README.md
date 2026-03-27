@@ -2,18 +2,6 @@
 
 **bioagents** is a lightweight, bio-inspired multi-agent reasoning framework where independent agents generate, debate, and converge on the best insights for a given task.
 
-## Project Page
-
-Available at:
-https://<your-username>.github.io/bioagents/
-
-GitHub Pages setup:
-- Go to repo `Settings -> Pages`
-- Choose `Deploy from branch`
-- Select `main`
-- Select `/docs`
-- Save
-
 ---
 
 ## TL;DR
@@ -48,17 +36,6 @@ bioagents runs a **goal-directed swarm loop** over your input:
 - Product analysis (why users churn, what to improve)
 - Document reasoning (risks, inconsistencies, actions)
 - Strategy exploration (multiple approaches + tradeoffs)
-
----
-
-## Core concepts
-
-- **Agents** → different perspectives (bug, strategy, solution, etc.)
-- **Skills** → capabilities agents can use (analyze, rewrite, evaluate)
-- **Objective** → what the swarm is trying to solve
-- **Blackboard** → shared space where ideas evolve
-- **Rules** → reinforce, contradict, decay, prune
-- **Clustering** → merge near-duplicate ideas before ranking
 
 ---
 
@@ -240,6 +217,17 @@ pytest
 ## Runtime visibility
 
 Each run prints the active mode, task type, objective, per-agent timings, and a short summary before the final JSON output, including formed clusters and final returned results. Local agents also show that they ran without an LLM call.
+
+---
+
+## Core concepts
+
+- **Agents** → different perspectives (bug, strategy, solution, etc.)
+- **Skills** → capabilities agents can use (analyze, rewrite, evaluate)
+- **Objective** → what the swarm is trying to solve
+- **Blackboard** → shared space where ideas evolve
+- **Rules** → reinforce, contradict, decay, prune
+- **Clustering** → merge near-duplicate ideas before ranking
 
 ---
 
