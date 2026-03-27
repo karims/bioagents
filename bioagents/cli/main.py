@@ -7,7 +7,7 @@ import typer
 from bioagents.core.agent import Agent, CriticAgent
 from bioagents.core.runtime import SwarmRuntime
 from bioagents.llm.prompts import build_bug_prompt, build_performance_prompt
-from bioagents.llm.provider import Provider, provider_from_env
+from bioagents.llm.provider import Provider, get_provider_from_env
 
 app = typer.Typer()
 run_app = typer.Typer()
@@ -39,11 +39,8 @@ def build_demo_agents(provider: Provider | None = None) -> list[Agent]:
 @run_app.callback(invoke_without_command=True)
 def run(input_file: Path) -> None:
     context = load_input(input_file)
-    provider = provider_from_env()
-    typer.echo(
-        f"mode={'provider' if provider is not None else 'fallback'}",
-        err=True,
-    )
+    mode, provider = get_provider_from_env()
+    typer.echo(f"mode={mode}", err=True)
     runtime = SwarmRuntime(agents=build_demo_agents(provider=provider))
     hypotheses = runtime.run(context)
     typer.echo(json.dumps([asdict(hypothesis) for hypothesis in hypotheses], indent=2))
