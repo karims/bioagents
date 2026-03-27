@@ -1,39 +1,52 @@
 # bioagents
 
-Minimal Python swarm runtime skeleton.
+Experimental hobby project for running a tiny multi-agent blackboard loop over text tasks.
 
-Hypotheses are structured objects with `text`, `source`, `confidence`, `support`, and `sources`.
-Blackboard storage is separate from swarm rules.
-Repeated hypotheses are reinforced by a local rule.
-Confidence also decays over runtime steps, and weak hypotheses can be pruned.
-Hypotheses can also be challenged by critic agents, which lower confidence on targeted ideas.
-This creates a minimal support-versus-opposition loop while keeping future rules easy to add.
-The project also includes a small pytest-based test suite.
-Bioagents can use Ollama locally, an OpenAI-compatible LLM endpoint, or fallback mode when no LLM env vars are set.
-Task input now uses a small model with `task_type`, `title`, `data`, and optional `metadata`.
-Final outputs are ranked by strength, and you can optionally return only the top results.
-Task JSON can also include runtime config for built-in agents (`bug_agent`, `performance_agent`, `critic_agent`) and rules (`reinforce`, `contradict`, `decay`, `prune`).
+Current capabilities:
+- Task JSON with optional runtime config
+- Built-in agents: `bug_agent`, `performance_agent`, `critic_agent`
+- Built-in rules: `reinforce`, `contradict`, `decay`, `prune`
+- Ranked final outputs with optional `--top-k`
+- Ollama, OpenAI-compatible, or fallback mode
+- Pytest test suite
 
-## Run
+## Quickstart
 
 ```bash
-python -m pip install -e .
+python -m pip install -e '.[dev]'
 bioagents run demos/sample_task.json
 bioagents run demos/document_task.json
 bioagents run demos/sample_task.json --top-k 1
 ```
 
-`--top-k` overrides `config.top_k` from the task file when both are present.
+Task JSON may include a `config` block for agents, rules, `max_steps`, and `top_k`.
+CLI `--top-k` overrides `config.top_k`.
 
-LLM env vars:
+## Docker
+
+```bash
+docker build -t bioagents .
+docker run --rm bioagents
+```
+
+To use local Ollama from Docker on macOS/Windows:
+
+```bash
+docker run --rm -e BIOAGENTS_LLM_PROVIDER=ollama -e BIOAGENTS_LLM_MODEL=llama3.1:8b -e BIOAGENTS_LLM_BASE_URL=http://host.docker.internal:11434 bioagents
+```
+
+## Env Vars
+
+Ollama:
 
 ```bash
 export BIOAGENTS_LLM_PROVIDER=ollama
 export BIOAGENTS_LLM_MODEL=llama3.1:8b
+export BIOAGENTS_LLM_BASE_URL=http://localhost:11434
 bioagents run demos/sample_task.json
 ```
 
-OpenAI-compatible env vars:
+OpenAI-compatible:
 
 ```bash
 export BIOAGENTS_LLM_BASE_URL="https://api.openai.com/v1"
@@ -42,23 +55,8 @@ export BIOAGENTS_LLM_MODEL="gpt-4o-mini"
 bioagents run demos/sample_task.json
 ```
 
-## Test
+## Tests
 
 ```bash
-python -m pip install -e .[dev]
 pytest
-```
-
-Example output:
-
-```json
-[
-  {
-    "text": "possible bug",
-    "source": "bug_agent",
-    "confidence": 0.64,
-    "support": 3,
-    "sources": ["bug_agent"]
-  }
-]
 ```
