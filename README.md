@@ -6,7 +6,8 @@ Hypotheses are structured objects with `text`, `source`, `confidence`, `support`
 Blackboard storage is separate from swarm rules.
 Repeated hypotheses are reinforced by a local rule.
 Confidence also decays over runtime steps, and weak hypotheses can be pruned.
-This creates a minimal exploration versus stabilization loop while keeping future rules easy to add.
+Hypotheses can also be challenged by critic agents, which lower confidence on targeted ideas.
+This creates a minimal support-versus-opposition loop while keeping future rules easy to add.
 
 ## Run
 

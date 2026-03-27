@@ -4,8 +4,8 @@ from pathlib import Path
 
 import typer
 
-from bioagents.core.agent import Agent
-from bioagents.core.models import Hypothesis
+from bioagents.core.agent import Agent, CriticAgent
+from bioagents.core.models import Hypothesis, HypothesisSubmission
 from bioagents.core.runtime import SwarmRuntime
 
 app = typer.Typer()
@@ -22,23 +22,28 @@ def build_demo_agents() -> list[Agent]:
         Agent(
             name="bug_agent",
             outputs=[
-                Hypothesis(
-                    text="possible bug",
-                    source="bug_agent",
-                    confidence=0.6,
+                HypothesisSubmission(
+                    hypothesis=Hypothesis(
+                        text="possible bug",
+                        source="bug_agent",
+                        confidence=0.6,
+                    )
                 )
             ],
         ),
         Agent(
             name="performance_agent",
             outputs=[
-                Hypothesis(
-                    text="performance issue",
-                    source="performance_agent",
-                    confidence=0.55,
+                HypothesisSubmission(
+                    hypothesis=Hypothesis(
+                        text="performance issue",
+                        source="performance_agent",
+                        confidence=0.55,
+                    )
                 )
             ],
         ),
+        CriticAgent(name="critic_agent"),
     ]
 
 

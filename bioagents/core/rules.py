@@ -1,11 +1,16 @@
 from dataclasses import dataclass
 from typing import Protocol
 
-from bioagents.core.models import Hypothesis
+from bioagents.core.models import CritiqueSubmission, Hypothesis
 
 
 class Rule(Protocol):
     def apply(self, existing: Hypothesis, incoming: Hypothesis) -> None:
+        ...
+
+
+class CritiqueRule(Protocol):
+    def apply(self, existing: Hypothesis, critique: CritiqueSubmission) -> None:
         ...
 
 
@@ -23,6 +28,17 @@ class ReinforceOnRepeatRule:
         if incoming.source not in existing.sources:
             existing.sources.append(incoming.source)
         existing.confidence = min(1.0, existing.confidence + self.confidence_bump)
+
+
+@dataclass
+class ContradictRule:
+    confidence_penalty: float = 0.08
+
+    def apply(self, existing: Hypothesis, critique: CritiqueSubmission) -> None:
+        existing.opposition += 1
+        if critique.source not in existing.critic_sources:
+            existing.critic_sources.append(critique.source)
+        existing.confidence = max(0.0, existing.confidence - self.confidence_penalty)
 
 
 @dataclass
