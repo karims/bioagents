@@ -37,7 +37,13 @@ def build_runtime() -> SwarmRuntime:
 def test_runtime_runs_without_env_vars() -> None:
     runtime = SwarmRuntime.from_config(provider=None)
 
-    hypotheses = runtime.run(Task(task_type="pr_review", data="loop over users"))
+    hypotheses = runtime.run(
+        Task(
+            task_type="pr_review",
+            data="loop over users",
+            objective="identify the main risks and suggest the most useful improvement",
+        )
+    )
 
     assert hypotheses
     assert all(isinstance(hypothesis, Hypothesis) for hypothesis in hypotheses)
@@ -46,7 +52,14 @@ def test_runtime_runs_without_env_vars() -> None:
 def test_agents_produce_structured_submissions_without_real_api_calls() -> None:
     agents = get_agents(None, provider=MockProvider("missing null check"))
 
-    submissions = agents[0].act(Task(task_type="pr_review", data="profile.email"), board=_EmptyBoard())
+    submissions = agents[0].act(
+        Task(
+            task_type="pr_review",
+            data="profile.email",
+            objective="find the most useful improvement",
+        ),
+        board=_EmptyBoard(),
+    )
 
     assert len(submissions) == 1
     assert isinstance(submissions[0], HypothesisSubmission)
@@ -123,6 +136,40 @@ def test_runtime_respects_config_selected_agents_and_rules() -> None:
     assert len(hypotheses) == 1
     assert hypotheses[0].opposition == 0
     assert hypotheses[0].support == 2
+
+
+def test_solution_and_strategy_agents_produce_structured_outputs() -> None:
+    agents = get_agents(
+        ["solution_agent", "strategy_agent"],
+        provider=MockProvider("use a guard before the access"),
+    )
+
+    solution = agents[0].act(Task(task_type="pr_review", data="x"), board=_EmptyBoard())
+    strategy = agents[1].act(Task(task_type="pr_review", data="x"), board=_EmptyBoard())
+
+    assert isinstance(solution[0], HypothesisSubmission)
+    assert isinstance(strategy[0], HypothesisSubmission)
+
+
+def test_runtime_supports_constructive_and_critic_agents_together() -> None:
+    runtime = SwarmRuntime.from_config(
+        RuntimeConfig(
+            agents=["solution_agent", "strategy_agent", "critic_agent"],
+            rules=["reinforce", "contradict"],
+            max_steps=2,
+        ),
+        provider=None,
+    )
+
+    hypotheses = runtime.run(
+        Task(
+            task_type="document_review",
+            data="The plan says rollout is safe, but dashboards may lag.",
+            objective="identify the main concern and propose the best next action",
+        )
+    )
+
+    assert hypotheses
 
 
 class _EmptyBoard:

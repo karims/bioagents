@@ -4,7 +4,8 @@ Experimental hobby project for running a tiny multi-agent blackboard loop over t
 
 Current capabilities:
 - Task JSON with optional runtime config
-- Built-in agents: `bug_agent`, `performance_agent`, `critic_agent`
+- Task objective support for goal-directed runs
+- Built-in agents: `bug_agent`, `performance_agent`, `solution_agent`, `strategy_agent`, `critic_agent`
 - Built-in rules: `reinforce`, `contradict`, `decay`, `prune`
 - Ranked final outputs with optional `--top-k`
 - Ollama, OpenAI-compatible, or fallback mode
@@ -12,6 +13,7 @@ Current capabilities:
 - Constrained prompts for short plain-text outputs
 - Exact-match normalization for whitespace, case, and trailing punctuation
 - Heuristic near-duplicate merging with `difflib` similarity before final ranking
+- Static descriptive skills for agents such as `analyze`, `rewrite`, and `suggest_strategy`
 - Pytest test suite
 
 ## Quickstart
@@ -23,7 +25,7 @@ bioagents run demos/document_task.json
 bioagents run demos/sample_task.json --top-k 1
 ```
 
-Task JSON may include a `config` block for agents, rules, `max_steps`, and `top_k`.
+Task JSON may include an `objective` plus a `config` block for agents, rules, `max_steps`, and `top_k`.
 CLI `--top-k` overrides `config.top_k`.
 Final results also merge near-duplicates with heuristic `difflib` similarity.
 
@@ -68,3 +70,4 @@ pytest
 
 Provider failures fall back explicitly for the current run.
 Similarity merging is heuristic and not embedding-based or semantic.
+Skills are descriptive only for now and are not executable tools.

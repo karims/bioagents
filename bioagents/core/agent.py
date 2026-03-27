@@ -3,6 +3,7 @@ import sys
 from typing import Any, Callable
 
 from bioagents.core.models import CritiqueSubmission, Hypothesis, HypothesisSubmission, Submission
+from bioagents.core.skills import get_skill_descriptions
 from bioagents.core.task import Task
 from bioagents.llm.provider import Provider
 
@@ -10,10 +11,11 @@ from bioagents.llm.provider import Provider
 @dataclass
 class Agent:
     name: str
+    skills: list[str] = field(default_factory=list)
     outputs: list[Submission] = field(default_factory=list)
     fallback_text: str | None = None
     provider: Provider | None = None
-    prompt_builder: Callable[[Task, Any], str] | None = None
+    prompt_builder: Callable[[Task, Any, list[str], list[str]], str] | None = None
 
     def _clean_generated_text(self, text: str) -> str:
         cleaned = next((line.strip() for line in text.splitlines() if line.strip()), "")
@@ -27,7 +29,9 @@ class Agent:
         if self.provider is not None and self.prompt_builder is not None:
             try:
                 text = self._clean_generated_text(
-                    self.provider.generate(self.prompt_builder(task, board)).strip()
+                    self.provider.generate(
+                        self.prompt_builder(task, board, self.skills, get_skill_descriptions(self.skills))
+                    ).strip()
                 )
             except Exception:
                 provider_name = getattr(self.provider, "mode_name", "provider")
@@ -51,6 +55,7 @@ class Agent:
 @dataclass
 class CriticAgent:
     name: str
+    skills: list[str] = field(default_factory=lambda: ["evaluate_risk", "identify_tradeoffs"])
 
     def act(self, task: Task, board: Any) -> list[Submission]:
         hypotheses = board.get_all()

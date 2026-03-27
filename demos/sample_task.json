@@ -1,13 +1,14 @@
 {
   "task_type": "pr_review",
   "title": "Null-safe email access in user scan",
+  "objective": "identify the main risks and suggest the most useful improvement",
   "data": "This PR adds a loop over all users, fetches user.profile.email without checking whether profile exists, and recalculates the full user summary inside the loop.",
   "metadata": {
     "repo": "bioagents/demo",
     "author": "demo-user"
   },
   "config": {
-    "agents": ["bug_agent", "performance_agent", "critic_agent"],
+    "agents": ["bug_agent", "performance_agent", "solution_agent", "strategy_agent", "critic_agent"],
     "rules": ["reinforce", "contradict", "decay", "prune"],
     "max_steps": 3,
     "top_k": 2,

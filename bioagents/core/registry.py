@@ -2,11 +2,22 @@ from bioagents.core.agent import Agent, CriticAgent
 from bioagents.core.blackboard import Blackboard
 from bioagents.core.config import RuntimeConfig
 from bioagents.core.rules import ContradictRule, DecayRule, PruneRule, ReinforceOnRepeatRule
-from bioagents.llm.prompts import build_bug_prompt, build_performance_prompt
+from bioagents.llm.prompts import (
+    build_bug_prompt,
+    build_performance_prompt,
+    build_solution_prompt,
+    build_strategy_prompt,
+)
 from bioagents.llm.provider import Provider
 
 
-DEFAULT_AGENT_NAMES = ["bug_agent", "performance_agent", "critic_agent"]
+DEFAULT_AGENT_NAMES = [
+    "bug_agent",
+    "performance_agent",
+    "solution_agent",
+    "strategy_agent",
+    "critic_agent",
+]
 DEFAULT_RULE_NAMES = ["reinforce", "contradict", "decay", "prune"]
 
 
@@ -14,6 +25,7 @@ def get_agent(name: str, provider: Provider | None = None) -> Agent:
     if name == "bug_agent":
         return Agent(
             name="bug_agent",
+            skills=["analyze", "evaluate_risk"],
             fallback_text="possible bug",
             provider=provider,
             prompt_builder=build_bug_prompt,
@@ -21,9 +33,26 @@ def get_agent(name: str, provider: Provider | None = None) -> Agent:
     if name == "performance_agent":
         return Agent(
             name="performance_agent",
+            skills=["analyze", "evaluate_risk"],
             fallback_text="performance issue",
             provider=provider,
             prompt_builder=build_performance_prompt,
+        )
+    if name == "solution_agent":
+        return Agent(
+            name="solution_agent",
+            skills=["rewrite", "suggest_strategy"],
+            fallback_text="add a guard before the risky access",
+            provider=provider,
+            prompt_builder=build_solution_prompt,
+        )
+    if name == "strategy_agent":
+        return Agent(
+            name="strategy_agent",
+            skills=["summarize", "suggest_strategy", "identify_tradeoffs"],
+            fallback_text="fix the highest-risk issue first",
+            provider=provider,
+            prompt_builder=build_strategy_prompt,
         )
     if name == "critic_agent":
         return CriticAgent(name="critic_agent")

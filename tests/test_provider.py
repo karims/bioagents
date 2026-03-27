@@ -1,4 +1,5 @@
-from bioagents.core.registry import get_agents
+from bioagents.core.registry import get_agent, get_agents
+from bioagents.core.skills import get_skill_description
 from bioagents.core.task import Task
 from bioagents.llm.prompts import build_bug_prompt
 from bioagents.llm.provider import MockProvider, OllamaProvider, get_provider_from_env, provider_from_env
@@ -72,7 +73,13 @@ def test_provider_failure_surfaces_warning_and_falls_back_cleanly(capsys) -> Non
 
 
 def test_prompts_request_short_plain_output() -> None:
-    prompt = build_bug_prompt(Task(task_type="pr_review", data="x"), _EmptyBoard())
+    bug_agent = get_agent("bug_agent", provider=None)
+    prompt = build_bug_prompt(
+        Task(task_type="pr_review", data="x"),
+        _EmptyBoard(),
+        bug_agent.skills,
+        [get_skill_description(skill) for skill in bug_agent.skills],
+    )
 
     assert "exactly one short plain sentence" in prompt
     assert "No markdown, bullets, code, explanation, or quotes." in prompt

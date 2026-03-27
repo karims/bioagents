@@ -14,7 +14,7 @@ def test_config_model_loads_from_task_json() -> None:
     task = load_task(Path("demos/sample_task.json"))
 
     assert task.config == RuntimeConfig(
-        agents=["bug_agent", "performance_agent", "critic_agent"],
+        agents=["bug_agent", "performance_agent", "solution_agent", "strategy_agent", "critic_agent"],
         rules=["reinforce", "contradict", "decay", "prune"],
         max_steps=3,
         top_k=2,

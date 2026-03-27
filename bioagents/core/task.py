@@ -11,6 +11,7 @@ class Task:
     task_type: str
     data: str
     title: str | None = None
+    objective: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
     config: RuntimeConfig | None = None
 
@@ -31,6 +32,7 @@ def load_task(input_file: Path) -> Task:
         task_type=payload.get("task_type", payload.get("task", "task")),
         title=payload.get("title"),
         data=payload["data"],
+        objective=payload.get("objective"),
         metadata=payload.get("metadata", {}),
         config=config,
     )
