@@ -40,7 +40,7 @@ def run(
             top_k=config.top_k,
             similarity_threshold=similarity_threshold,
         )
-    runtime = SwarmRuntime.from_config(config=config, provider=provider)
+    runtime = SwarmRuntime.from_config(config=config, task_type=task.task_type, provider=provider)
     hypotheses = runtime.run_with_telemetry(task, mode=mode, emit=typer.echo)
     typer.echo(json.dumps([asdict(hypothesis) for hypothesis in hypotheses], indent=2))
 

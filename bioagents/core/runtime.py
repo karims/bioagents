@@ -6,7 +6,7 @@ from bioagents.core.agent import Agent
 from bioagents.core.blackboard import Blackboard
 from bioagents.core.config import RuntimeConfig
 from bioagents.core.models import Hypothesis, HypothesisSubmission
-from bioagents.core.registry import get_agents, get_blackboard, resolve_config
+from bioagents.core.registry import get_blackboard, resolve_agents, resolve_config
 from bioagents.core.selector import HypothesisSelector
 from bioagents.core.task import Task
 from bioagents.llm.provider import Provider
@@ -24,11 +24,12 @@ class SwarmRuntime:
     def from_config(
         cls,
         config: RuntimeConfig | None = None,
+        task_type: str | None = None,
         provider: Provider | None = None,
     ) -> "SwarmRuntime":
         resolved = resolve_config(config)
         return cls(
-            agents=get_agents(resolved.agents, provider=provider),
+            agents=resolve_agents(resolved, task_type, provider=provider),
             max_steps=resolved.max_steps,
             top_k=resolved.top_k,
             similarity_threshold=resolved.similarity_threshold,

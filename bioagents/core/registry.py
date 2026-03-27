@@ -3,6 +3,7 @@ from bioagents.core.blackboard import Blackboard
 from bioagents.core.config import RuntimeConfig
 from bioagents.core.rules import ContradictRule, DecayRule, PruneRule, ReinforceOnRepeatRule
 from bioagents.registry.agents import AGENT_REGISTRY
+from bioagents.registry.tasks import TASK_AGENT_MAP
 from bioagents.llm.provider import Provider
 
 
@@ -25,6 +26,18 @@ def get_agent(name: str, provider: Provider | None = None) -> Agent:
 def get_agents(names: list[str] | None, provider: Provider | None = None) -> list[Agent]:
     selected_names = names or DEFAULT_AGENT_NAMES
     return [get_agent(name, provider=provider) for name in selected_names]
+
+
+def resolve_agents(
+    config: RuntimeConfig | None,
+    task_type: str | None,
+    provider: Provider | None = None,
+) -> list[Agent]:
+    if config and getattr(config, "agents", None):
+        names = config.agents
+    else:
+        names = TASK_AGENT_MAP.get(task_type or "", DEFAULT_AGENT_NAMES)
+    return [get_agent(name, provider=provider) for name in names]
 
 
 def get_blackboard(names: list[str] | None) -> Blackboard:

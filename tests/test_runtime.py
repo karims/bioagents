@@ -54,7 +54,7 @@ def build_runtime() -> SwarmRuntime:
 
 
 def test_runtime_runs_without_env_vars() -> None:
-    runtime = SwarmRuntime.from_config(provider=None)
+    runtime = SwarmRuntime.from_config(task_type="pr_review", provider=None)
 
     hypotheses = runtime.run(
         Task(
@@ -177,6 +177,7 @@ def test_runtime_supports_constructive_and_critic_agents_together() -> None:
             rules=["reinforce", "contradict"],
             max_steps=2,
         ),
+        task_type="document_review",
         provider=None,
     )
 

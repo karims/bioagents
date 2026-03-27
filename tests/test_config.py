@@ -5,7 +5,7 @@ from typer.testing import CliRunner
 
 from bioagents.cli.main import app
 from bioagents.core.config import RuntimeConfig
-from bioagents.core.registry import get_agent, get_agents, get_blackboard
+from bioagents.core.registry import get_agent, get_agents, get_blackboard, resolve_agents
 from bioagents.core.runtime import SwarmRuntime
 from bioagents.core.task import load_task
 
@@ -49,6 +49,7 @@ def test_invalid_rule_name_fails_clearly() -> None:
 def test_runtime_respects_config_selected_agents() -> None:
     runtime = SwarmRuntime.from_config(
         RuntimeConfig(agents=["performance_agent"], rules=["reinforce"], max_steps=2),
+        task_type="document_analysis",
         provider=None,
     )
 
@@ -56,6 +57,38 @@ def test_runtime_respects_config_selected_agents() -> None:
 
     assert len(hypotheses) == 1
     assert hypotheses[0].text == "performance issue"
+
+
+def test_task_type_selects_correct_agents() -> None:
+    agents = resolve_agents(None, "document_analysis", provider=None)
+
+    assert [agent.name for agent in agents] == [
+        "strategy_agent",
+        "solution_agent",
+        "critic_agent",
+    ]
+
+
+def test_config_agents_override_task_type() -> None:
+    agents = resolve_agents(
+        RuntimeConfig(agents=["bug_agent"]),
+        "document_analysis",
+        provider=None,
+    )
+
+    assert [agent.name for agent in agents] == ["bug_agent"]
+
+
+def test_unknown_task_type_falls_back_to_default_agents() -> None:
+    agents = resolve_agents(None, "unknown_task_type", provider=None)
+
+    assert [agent.name for agent in agents] == [
+        "bug_agent",
+        "performance_agent",
+        "solution_agent",
+        "strategy_agent",
+        "critic_agent",
+    ]
 
 
 def test_cli_top_k_overrides_config_top_k() -> None:

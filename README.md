@@ -163,6 +163,8 @@ This makes it useful for:
 }
 ```
 
+`task_type` influences which built-in agents are used by default. You can override that with `config.agents`.
+
 ---
 
 ## Docker

@@ -21,7 +21,7 @@ def test_load_task_from_json() -> None:
 
 
 def test_runtime_works_with_task_model() -> None:
-    runtime = SwarmRuntime.from_config(provider=None)
+    runtime = SwarmRuntime.from_config(task_type="document_review", provider=None)
 
     hypotheses = runtime.run(
         Task(
@@ -35,7 +35,7 @@ def test_runtime_works_with_task_model() -> None:
 
 
 def test_sample_demo_runs_in_fallback_mode() -> None:
-    runtime = SwarmRuntime.from_config(provider=None)
+    runtime = SwarmRuntime.from_config(task_type="pr_review", provider=None)
 
     hypotheses = runtime.run(load_task(Path("demos/sample_task.json")))
 
@@ -43,7 +43,7 @@ def test_sample_demo_runs_in_fallback_mode() -> None:
 
 
 def test_document_demo_runs_in_fallback_mode() -> None:
-    runtime = SwarmRuntime.from_config(provider=None)
+    runtime = SwarmRuntime.from_config(task_type="document_review", provider=None)
 
     hypotheses = runtime.run(load_task(Path("demos/document_task.json")))
 
