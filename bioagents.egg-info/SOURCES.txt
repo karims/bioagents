@@ -13,6 +13,7 @@ bioagents/core/blackboard.py
 bioagents/core/models.py
 bioagents/core/rules.py
 bioagents/core/runtime.py
+bioagents/core/selector.py
 bioagents/core/task.py
 bioagents/llm/__init__.py
 bioagents/llm/prompts.py
@@ -21,4 +22,5 @@ tests/test_blackboard.py
 tests/test_provider.py
 tests/test_rules.py
 tests/test_runtime.py
+tests/test_selector.py
 tests/test_task.py

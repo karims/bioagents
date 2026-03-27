@@ -11,6 +11,7 @@ This creates a minimal support-versus-opposition loop while keeping future rules
 The project also includes a small pytest-based test suite.
 Bioagents can use Ollama locally, an OpenAI-compatible LLM endpoint, or fallback mode when no LLM env vars are set.
 Task input now uses a small model with `task_type`, `title`, `data`, and optional `metadata`.
+Final outputs are ranked by strength, and you can optionally return only the top results.
 
 ## Run
 
@@ -18,6 +19,7 @@ Task input now uses a small model with `task_type`, `title`, `data`, and optiona
 python -m pip install -e .
 bioagents run demos/sample_task.json
 bioagents run demos/document_task.json
+bioagents run demos/sample_task.json --top-k 1
 ```
 
 LLM env vars:

@@ -87,6 +87,25 @@ def test_critic_agent_causes_opposition_on_targeted_hypothesis() -> None:
     assert targeted.critic_sources == ["critic_agent"]
 
 
+def test_runtime_returns_ranked_output() -> None:
+    runtime = build_runtime()
+
+    hypotheses = runtime.run(Task(task_type="analyze_code", data="dummy input"))
+
+    assert [hypothesis.text for hypothesis in hypotheses] == [
+        "performance issue",
+        "possible bug",
+    ]
+
+
+def test_runtime_top_k_limits_final_results() -> None:
+    runtime = SwarmRuntime(agents=build_runtime().agents, max_steps=3, top_k=1)
+
+    hypotheses = runtime.run(Task(task_type="analyze_code", data="dummy input"))
+
+    assert len(hypotheses) == 1
+
+
 class _EmptyBoard:
     def get_all(self) -> list[Hypothesis]:
         return []

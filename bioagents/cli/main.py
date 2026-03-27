@@ -11,8 +11,6 @@ from bioagents.llm.prompts import build_bug_prompt, build_performance_prompt
 from bioagents.llm.provider import Provider, get_provider_from_env
 
 app = typer.Typer()
-run_app = typer.Typer()
-app.add_typer(run_app, name="run")
 
 
 def build_demo_agents(provider: Provider | None = None) -> list[Agent]:
@@ -33,14 +31,19 @@ def build_demo_agents(provider: Provider | None = None) -> list[Agent]:
     ]
 
 
-@run_app.callback(invoke_without_command=True)
-def run(input_file: Path) -> None:
+@app.command("run")
+def run(input_file: Path, top_k: int | None = typer.Option(default=None)) -> None:
     task = load_task(input_file)
     mode, provider = get_provider_from_env()
     typer.echo(f"mode={mode}", err=True)
-    runtime = SwarmRuntime(agents=build_demo_agents(provider=provider))
+    runtime = SwarmRuntime(agents=build_demo_agents(provider=provider), top_k=top_k)
     hypotheses = runtime.run(task)
     typer.echo(json.dumps([asdict(hypothesis) for hypothesis in hypotheses], indent=2))
+
+
+@app.command(hidden=True)
+def _unused() -> None:
+    pass
 
 
 def main() -> None:
