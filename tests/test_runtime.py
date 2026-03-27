@@ -12,6 +12,20 @@ from bioagents.core.task import Task
 from bioagents.llm.provider import MockProvider
 
 
+def _clean_provider_env() -> dict[str, str]:
+    return {
+        "BIOAGENTS_LLM_PROVIDER": "",
+        "BIOAGENTS_OLLAMA_MODEL": "",
+        "BIOAGENTS_OLLAMA_BASE_URL": "",
+        "BIOAGENTS_OPENAI_API_KEY": "",
+        "BIOAGENTS_OPENAI_MODEL": "",
+        "BIOAGENTS_OPENAI_BASE_URL": "",
+        "BIOAGENTS_LLM_API_KEY": "",
+        "BIOAGENTS_LLM_MODEL": "",
+        "BIOAGENTS_LLM_BASE_URL": "",
+    }
+
+
 def build_runtime() -> SwarmRuntime:
     agents = [
         Agent(
@@ -180,7 +194,11 @@ def test_runtime_supports_constructive_and_critic_agents_together() -> None:
 def test_cli_telemetry_keeps_final_output_valid_json() -> None:
     runner = CliRunner()
 
-    result = runner.invoke(app, ["run", "demos/sample_task.json", "--top-k", "1"])
+    result = runner.invoke(
+        app,
+        ["run", "demos/sample_task.json", "--top-k", "1"],
+        env=_clean_provider_env(),
+    )
 
     assert result.exit_code == 0
     assert "mode=fallback" in result.stdout
@@ -202,6 +220,7 @@ def test_runtime_logs_provider_warning_when_expected() -> None:
         app,
         ["run", "demos/sample_task.json", "--top-k", "1"],
         env={
+            **_clean_provider_env(),
             "BIOAGENTS_LLM_PROVIDER": "ollama",
             "BIOAGENTS_OLLAMA_MODEL": "llama3.1:latest",
             "BIOAGENTS_OLLAMA_BASE_URL": "http://127.0.0.1:9",
