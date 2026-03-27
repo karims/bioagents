@@ -10,4 +10,9 @@ bioagents.egg-info/top_level.txt
 bioagents/cli/main.py
 bioagents/core/agent.py
 bioagents/core/blackboard.py
+bioagents/core/models.py
+bioagents/core/rules.py
 bioagents/core/runtime.py
+tests/test_blackboard.py
+tests/test_rules.py
+tests/test_runtime.py
