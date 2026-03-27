@@ -5,8 +5,9 @@ from pathlib import Path
 import typer
 
 from bioagents.core.agent import Agent, CriticAgent
-from bioagents.core.models import Hypothesis, HypothesisSubmission
 from bioagents.core.runtime import SwarmRuntime
+from bioagents.llm.prompts import build_bug_prompt, build_performance_prompt
+from bioagents.llm.provider import Provider, provider_from_env
 
 app = typer.Typer()
 run_app = typer.Typer()
@@ -17,31 +18,19 @@ def load_input(input_file: Path) -> dict:
     return json.loads(input_file.read_text())
 
 
-def build_demo_agents() -> list[Agent]:
+def build_demo_agents(provider: Provider | None = None) -> list[Agent]:
     return [
         Agent(
             name="bug_agent",
-            outputs=[
-                HypothesisSubmission(
-                    hypothesis=Hypothesis(
-                        text="possible bug",
-                        source="bug_agent",
-                        confidence=0.6,
-                    )
-                )
-            ],
+            fallback_text="possible bug",
+            provider=provider,
+            prompt_builder=build_bug_prompt,
         ),
         Agent(
             name="performance_agent",
-            outputs=[
-                HypothesisSubmission(
-                    hypothesis=Hypothesis(
-                        text="performance issue",
-                        source="performance_agent",
-                        confidence=0.55,
-                    )
-                )
-            ],
+            fallback_text="performance issue",
+            provider=provider,
+            prompt_builder=build_performance_prompt,
         ),
         CriticAgent(name="critic_agent"),
     ]
@@ -50,7 +39,12 @@ def build_demo_agents() -> list[Agent]:
 @run_app.callback(invoke_without_command=True)
 def run(input_file: Path) -> None:
     context = load_input(input_file)
-    runtime = SwarmRuntime(agents=build_demo_agents())
+    provider = provider_from_env()
+    typer.echo(
+        f"mode={'provider' if provider is not None else 'fallback'}",
+        err=True,
+    )
+    runtime = SwarmRuntime(agents=build_demo_agents(provider=provider))
     hypotheses = runtime.run(context)
     typer.echo(json.dumps([asdict(hypothesis) for hypothesis in hypotheses], indent=2))
 

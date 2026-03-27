@@ -1,6 +1,8 @@
+from bioagents.cli.main import build_demo_agents
 from bioagents.core.agent import Agent, CriticAgent
 from bioagents.core.models import Hypothesis, HypothesisSubmission
 from bioagents.core.runtime import SwarmRuntime
+from bioagents.llm.provider import MockProvider
 
 
 def build_runtime() -> SwarmRuntime:
@@ -28,6 +30,25 @@ def build_runtime() -> SwarmRuntime:
         CriticAgent(name="critic_agent"),
     ]
     return SwarmRuntime(agents=agents, max_steps=3)
+
+
+def test_runtime_runs_without_env_vars() -> None:
+    runtime = SwarmRuntime(agents=build_demo_agents(provider=None), max_steps=3)
+
+    hypotheses = runtime.run({"task": "pr_review", "data": "loop over users"})
+
+    assert hypotheses
+    assert all(isinstance(hypothesis, Hypothesis) for hypothesis in hypotheses)
+
+
+def test_agents_produce_structured_submissions_without_real_api_calls() -> None:
+    agents = build_demo_agents(provider=MockProvider("missing null check"))
+
+    submissions = agents[0].act({"task": "pr_review", "data": "profile.email"}, board=_EmptyBoard())
+
+    assert len(submissions) == 1
+    assert isinstance(submissions[0], HypothesisSubmission)
+    assert submissions[0].hypothesis.text == "missing null check"
 
 
 def test_runtime_executes_for_fixed_number_of_steps() -> None:
@@ -63,3 +84,8 @@ def test_critic_agent_causes_opposition_on_targeted_hypothesis() -> None:
 
     assert targeted.opposition == 3
     assert targeted.critic_sources == ["critic_agent"]
+
+
+class _EmptyBoard:
+    def get_all(self) -> list[Hypothesis]:
+        return []

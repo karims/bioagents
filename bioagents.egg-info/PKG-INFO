@@ -19,12 +19,21 @@ Confidence also decays over runtime steps, and weak hypotheses can be pruned.
 Hypotheses can also be challenged by critic agents, which lower confidence on targeted ideas.
 This creates a minimal support-versus-opposition loop while keeping future rules easy to add.
 The project also includes a small pytest-based test suite.
+Bioagents can also use an OpenAI-compatible LLM endpoint, with fallback mode when no LLM env vars are set.
 
 ## Run
 
 ```bash
 python -m pip install -e .
 bioagents run demos/sample_task.json
+```
+
+LLM env vars:
+
+```bash
+export BIOAGENTS_LLM_BASE_URL="https://api.openai.com/v1"
+export BIOAGENTS_LLM_API_KEY="your-key"
+export BIOAGENTS_LLM_MODEL="gpt-4o-mini"
 ```
 
 ## Test

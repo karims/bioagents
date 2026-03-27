@@ -1,4 +1,4 @@
 {
-  "task": "analyze code",
-  "data": "dummy input"
+  "task": "pr_review",
+  "data": "This PR adds a new loop over all users and accesses user.profile.email without checking if profile exists."
 }
