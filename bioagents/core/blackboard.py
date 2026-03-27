@@ -5,14 +5,27 @@ from bioagents.core.models import Hypothesis
 
 @dataclass
 class Blackboard:
-    hypotheses: list[Hypothesis] = field(default_factory=list)
+    hypotheses: dict[str, Hypothesis] = field(default_factory=dict)
+
+    def _normalize(self, text: str) -> str:
+        return text.strip().lower()
 
     def add_hypothesis(self, hypothesis: Hypothesis) -> None:
-        self.hypotheses.append(hypothesis)
+        key = self._normalize(hypothesis.text)
+        existing = self.hypotheses.get(key)
+
+        if existing is None:
+            self.hypotheses[key] = hypothesis
+            return
+
+        existing.support += 1
+        if hypothesis.source not in existing.sources:
+            existing.sources.append(hypothesis.source)
+        existing.confidence = min(1.0, existing.confidence + 0.05)
 
     def add_hypotheses(self, hypotheses: list[Hypothesis]) -> None:
         for hypothesis in hypotheses:
             self.add_hypothesis(hypothesis)
 
     def get_all(self) -> list[Hypothesis]:
-        return list(self.hypotheses)
+        return list(self.hypotheses.values())

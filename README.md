@@ -2,7 +2,8 @@
 
 Minimal Python swarm runtime skeleton.
 
-Hypotheses are structured objects with `text`, `source`, and `confidence`.
+Hypotheses are structured objects with `text`, `source`, `confidence`, `support`, and `sources`.
+Repeated hypotheses are merged by normalized text, support is tracked, and confidence increases when the same idea reappears.
 
 ## Run
 
@@ -18,7 +19,9 @@ Example output:
   {
     "text": "possible bug",
     "source": "bug_agent",
-    "confidence": 0.6
+    "confidence": 0.7,
+    "support": 3,
+    "sources": ["bug_agent"]
   }
 ]
 ```
