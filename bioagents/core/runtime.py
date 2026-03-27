@@ -3,6 +3,7 @@ from typing import Any
 
 from bioagents.core.agent import Agent
 from bioagents.core.blackboard import Blackboard
+from bioagents.core.models import Hypothesis
 
 
 @dataclass
@@ -11,9 +12,9 @@ class SwarmRuntime:
     max_steps: int = 3
     board: Blackboard = field(default_factory=Blackboard)
 
-    def run(self, context: dict[str, Any]) -> list[str]:
+    def run(self, context: dict[str, Any]) -> list[Hypothesis]:
         for _ in range(self.max_steps):
             for agent in self.agents:
                 outputs = agent.act(context, self.board)
-                self.board.add(outputs)
+                self.board.add_hypotheses(outputs)
         return self.board.get_all()

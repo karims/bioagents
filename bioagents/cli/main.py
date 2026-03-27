@@ -1,9 +1,11 @@
 import json
+from dataclasses import asdict
 from pathlib import Path
 
 import typer
 
 from bioagents.core.agent import Agent
+from bioagents.core.models import Hypothesis
 from bioagents.core.runtime import SwarmRuntime
 
 app = typer.Typer()
@@ -17,8 +19,26 @@ def load_input(input_file: Path) -> dict:
 
 def build_demo_agents() -> list[Agent]:
     return [
-        Agent(name="Agent A", outputs=["possible bug"]),
-        Agent(name="Agent B", outputs=["performance issue"]),
+        Agent(
+            name="bug_agent",
+            outputs=[
+                Hypothesis(
+                    text="possible bug",
+                    source="bug_agent",
+                    confidence=0.6,
+                )
+            ],
+        ),
+        Agent(
+            name="performance_agent",
+            outputs=[
+                Hypothesis(
+                    text="performance issue",
+                    source="performance_agent",
+                    confidence=0.55,
+                )
+            ],
+        ),
     ]
 
 
@@ -27,7 +47,7 @@ def run(input_file: Path) -> None:
     context = load_input(input_file)
     runtime = SwarmRuntime(agents=build_demo_agents())
     hypotheses = runtime.run(context)
-    typer.echo(json.dumps(hypotheses, indent=2))
+    typer.echo(json.dumps([asdict(hypothesis) for hypothesis in hypotheses], indent=2))
 
 
 def main() -> None:

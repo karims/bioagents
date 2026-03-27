@@ -1,0 +1,18 @@
+Metadata-Version: 2.4
+Name: bioagents
+Version: 0.1.0
+Summary: Minimal swarm runtime skeleton
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: typer<1.0,>=0.12
+
+# bioagents
+
+Minimal Python swarm runtime skeleton.
+
+## Run
+
+```bash
+python -m pip install -e .
+bioagents run demos/sample_task.json
+```

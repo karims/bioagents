@@ -1,0 +1,2 @@
+[console_scripts]
+bioagents = bioagents.cli.main:main
