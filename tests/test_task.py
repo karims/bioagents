@@ -49,3 +49,26 @@ def test_document_demo_runs_in_fallback_mode() -> None:
     hypotheses = runtime.run(load_task(Path("demos/document_task.json")))
 
     assert hypotheses
+
+
+def test_load_task_supports_object_datasource_payload(tmp_path: Path) -> None:
+    text_file = tmp_path / "input.txt"
+    text_file.write_text("normalized datasource text", encoding="utf-8")
+    task_file = tmp_path / "task.json"
+    task_file.write_text(
+        """
+{
+  "task_type": "document_analysis",
+  "data": {
+    "type": "file",
+    "path": "__PATH__"
+  }
+}
+""".replace("__PATH__", str(text_file)),
+        encoding="utf-8",
+    )
+
+    task = load_task(task_file)
+
+    assert task.task_type == "document_analysis"
+    assert task.data == "normalized datasource text"

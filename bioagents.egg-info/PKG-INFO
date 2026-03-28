@@ -4,246 +4,172 @@ Version: 0.1.0
 Summary: Minimal swarm runtime skeleton
 Requires-Python: >=3.11
 Description-Content-Type: text/markdown
+Requires-Dist: requests<3.0,>=2.31
 Requires-Dist: typer<1.0,>=0.12
 Provides-Extra: dev
 Requires-Dist: pytest<9,>=8; extra == "dev"
 
-# bioagents
 
-**bioagents** is a lightweight, bio-inspired multi-agent reasoning framework where independent agents generate, debate, and converge on the best insights for a given task.
+# BioAgents
+
+**BioAgents** is a bio-inspired multi-agent reasoning framework where specialized agents collaborate, compete, and converge on the best insights for a given task.
+
+Instead of a single LLM or agent response, BioAgents simulates a **team of reasoning agents** that generate, debate, and refine ideas.
+
+BioAgents is not about generating answers.
+
+👉 It is about **evolving the best answer through competition**.
 
 ---
 
-## TL;DR
+# 🧠 TL;DR
 
-- Give it an input, a task type, and an objective  
-- Multiple agents propose ideas from different perspectives  
+- Provide input + objective  
+- Multiple agents generate hypotheses  
 - Agents reinforce or challenge each other  
-- Weak ideas fade, strong ones survive  
-- Near-duplicates are merged  
-- You get a clean, ranked set of insights  
+- Weak ideas decay, strong ones survive  
+- Similar ideas are merged  
+- You get a ranked set of insights  
 
-👉 Think: *a small team of AI specialists reasoning together instead of a single model response*
+👉 Think: *a team of AI specialists reasoning together*
 
 ---
 
-## What it does
+# ⚡ Why BioAgents?
 
-bioagents runs a **goal-directed swarm loop** over your input:
+Most **AI agent systems today**:
+- produce a **single final answer**
+- hide intermediate reasoning
+- lack structured disagreement
+- do not explore alternative hypotheses
 
-1. Agents generate hypotheses  
+BioAgents takes a different approach:
+
+- explores **multiple competing hypotheses**
+- enables **explicit collaboration and conflict**
+- models reasoning as an **evolutionary process**
+- produces **ranked, structured outputs**
+
+👉 Instead of asking *“what is the answer?”*  
+👉 BioAgents asks *“which idea survives competition?”*
+
+---
+
+# 🧩 How it works
+
+BioAgents runs a **swarm loop over hypotheses**:
+
+1. Agents generate ideas (hypotheses)  
 2. Agents support or contradict each other  
 3. Confidence evolves over iterations  
-4. Weak hypotheses decay and get pruned  
+4. Weak ideas decay and get pruned  
 5. Similar ideas are merged  
-6. Final outputs are ranked and returned  
+6. Final outputs are ranked  
+
+This is inspired by biological systems:
+- Ant colonies (reinforcement)
+- Bee colonies (exploration + exploitation)
+- Immune systems (anomaly detection)
 
 ---
 
-## Example use cases
+# 🧪 Example: PR Review
 
-- Code review (bugs, performance, fixes)
-- Product analysis (why users churn, what to improve)
-- Document reasoning (risks, inconsistencies, actions)
-- Strategy exploration (multiple approaches + tradeoffs)
-
----
-
-## Quickstart
+## CLI Command
 
 ```bash
-python -m pip install -e .
-
-bioagents run demos/sample_task.json
-bioagents run demos/document_task.json
-bioagents run demos/sample_task.json --top-k 1
+bioagents run demos/sample_task.json --policy bee --top-k 3
 ```
 
 ---
 
-## Example: PR Review
-
-#### Input
-
-We give bioagents a code change (or PR description) and a goal.
-
-Example task JSON:
+## Input
 
 ```json
 {
   "task_type": "pr_review",
-  "data": "This PR loops over all users and accesses user.profile.email without checking if profile exists.",
-  "objective": "identify the main risks and suggest the best improvement",
+  "data": "This PR loops over all users and accesses user.profile.email without checking if profile exists. It also performs a DB query inside the loop.",
+  "objective": "identify risks and suggest improvements",
   "config": {
-    "top_k": 2
+    "top_k": 3
   }
 }
 ```
 
 ---
 
-#### What each field means
+## Internal reasoning (simplified)
 
-* `task_type`
-  The type of problem. This helps select relevant reasoning patterns.
-  Examples: `pr_review`, `document_analysis`, `spreadsheet_analysis`
+### Step 1 — Generation
+- bug_agent → null access risk
+- performance_agent → N+1 query issue
+- solution_agent → add null checks
+- strategy_agent → batch fetch profiles
 
-* `data`
-  The actual input to analyze.
-  This can be code, text, logs, or structured data.
+### Step 2 — Interaction
+- critic_agent challenges weak hypotheses
+- performance_agent reinforces DB issue
+- strategy_agent supports batching approach
 
-* `objective`
-  The goal for this run.
-  This guides how agents reason and what they prioritize.
-
-* `config.top_k`
-  Number of final results to return after ranking.
-  bioagents may generate many ideas internally, but only the top K are returned.
-
----
-
-#### What happens internally
-
-bioagents runs a small swarm of specialized agents:
-
-* `bug_agent` -> looks for correctness issues
-* `performance_agent` -> looks for inefficiencies
-* `solution_agent` -> proposes fixes
-* `strategy_agent` -> suggests better approaches
-* `critic_agent` -> challenges weak ideas
-
-They operate in steps:
-
-1. Each agent proposes hypotheses
-2. Agents reinforce or contradict each other
-3. Weak ideas decay, strong ideas gain support
-4. Similar ideas are merged (clustering)
-5. Final results are ranked
-
-This is a bio-inspired process: ideas compete and evolve.
+### Step 3 — Refinement
+- duplicate ideas merged
+- weak hypotheses decay
+- strong hypotheses accumulate support
 
 ---
 
-#### Example output
+## Final Output
 
 ```json
 [
   {
-    "text": "Implement null-safe access for user.profile.email.",
-    "source": "solution_agent",
-    "confidence": 0.53
+    "text": "Database query inside loop creates N+1 performance issue; batch fetch profiles instead.",
+    "source": "performance_agent",
+    "confidence": 0.61
   },
   {
-    "text": "Accessing user.profile.email without checking if profile exists may cause a runtime error.",
+    "text": "Accessing user.profile.email without null check may cause runtime errors.",
     "source": "bug_agent",
-    "confidence": 0.48
+    "confidence": 0.55
+  },
+  {
+    "text": "Refactor loop to prefetch related data and add null-safe access.",
+    "source": "solution_agent",
+    "confidence": 0.52
   }
 ]
 ```
 
 ---
 
-#### Why this is useful
+# 🤔 Why not just use a single LLM or agent?
 
-Instead of a single answer, you get:
+### ❌ Traditional approach
+- One agent → one answer
+- No internal disagreement
+- No refinement loop
+- Limited exploration
 
-* multiple perspectives (bugs, performance, strategy)
-* ranked insights
-* both problems and actionable fixes
+### ✅ BioAgents approach
+- Multiple agents → multiple hypotheses
+- Explicit **support vs contradiction**
+- Iterative refinement
+- Structured ranking
 
-This makes it useful for:
-
-* PR reviews
-* design analysis
-* document reasoning
-* exploratory problem solving
-
----
-
-## Task format
-
-```json
-{
-  "task_type": "pr_review",
-  "data": "...",
-  "objective": "identify the main risks and suggest the best improvement",
-  "config": {
-    "top_k": 2
-  }
-}
-```
-
-`task_type` influences which built-in agents are used by default. You can override that with `config.agents`.
+👉 This turns reasoning into a **search problem over ideas**
 
 ---
 
-## Docker
+# 🧬 Policies
 
-```bash
-docker build -t bioagents .
-docker run --rm bioagents
-```
+BioAgents supports pluggable reasoning strategies:
 
-Using local Ollama from Docker (macOS/Windows):
-
-```bash
-docker run --rm \
-  -e BIOAGENTS_LLM_PROVIDER=ollama \
-  -e BIOAGENTS_OLLAMA_MODEL=llama3.1:8b \
-  -e BIOAGENTS_OLLAMA_BASE_URL=http://host.docker.internal:11434 \
-  bioagents
-```
-
----
-
-## Environment variables
-
-### Ollama
-
-```bash
-export BIOAGENTS_LLM_PROVIDER=ollama
-export BIOAGENTS_OLLAMA_MODEL=llama3.1:8b
-export BIOAGENTS_OLLAMA_BASE_URL=http://localhost:11434
-```
-
-### OpenAI-compatible
-
-```bash
-export BIOAGENTS_LLM_PROVIDER=openai-compatible
-export BIOAGENTS_OPENAI_BASE_URL="https://api.openai.com/v1"
-export BIOAGENTS_OPENAI_API_KEY="your-key"
-export BIOAGENTS_OPENAI_MODEL="gpt-4o-mini"
-```
-
----
-
-## Development
-
-```bash
-python -m pip install -e '.[dev]'
-pytest
-```
-
----
-
-## Runtime visibility
-
-Each run prints the active mode, task type, objective, per-agent timings, and a short summary before the final JSON output, including formed clusters and final returned results. Local agents also show that they ran without an LLM call.
-
----
-
-## Policies
-
-bioagents supports pluggable swarm policies:
-
-- `default`
-  Preserves the current baseline behavior with balanced reinforcement, contradiction, decay, and pruning.
-- `ant`
-  Emphasizes convergence via reinforcement trails on repeated strong ideas.
-- `bee`
-  Balances exploration early in the run with refinement later.
-- `immune`
-  Emphasizes anomaly and risk signals with stronger contradiction pressure.
+| Policy  | Behavior |
+|--------|--------|
+| default | Balanced reasoning |
+| ant     | Converges via reinforcement |
+| bee     | Explore → refine |
+| immune  | Focus on anomalies |
 
 Example:
 
@@ -253,19 +179,54 @@ bioagents run demos/sample_task.json --policy ant
 
 ---
 
-## Core concepts
+# 📚 More Examples
 
-- **Agents** → different perspectives (bug, strategy, solution, etc.)
-- **Skills** → capabilities agents can use (analyze, rewrite, evaluate)
-- **Objective** → what the swarm is trying to solve
-- **Blackboard** → shared space where ideas evolve
-- **Rules** → reinforce, contradict, decay, prune
-- **Clustering** → merge near-duplicate ideas before ranking
+We are adding more domain-specific examples in:
+
+👉 `EXAMPLES.md`
+
+Planned domains:
+- Code review
+- Incident analysis
+- Product reasoning
+- Strategy exploration
 
 ---
 
-## Notes
+# 🚀 Quickstart
 
-- Provider failures fall back automatically for the current run  
-- Similarity merging is heuristic (`difflib`) and intentionally conservative, not embedding-based  
-- Skills are currently descriptive, not executable tools yet  
+```bash
+python -m pip install -e .
+
+bioagents run demos/sample_task.json
+bioagents run demos/sample_task.json --policy bee
+```
+
+---
+
+# 🧱 Core Concepts
+
+- **Agents** → reasoning roles (bug, strategy, solution, etc.)
+- **Hypotheses** → competing ideas
+- **Blackboard** → shared reasoning space
+- **Rules** → reinforce / contradict / decay / prune
+- **Clustering** → merge similar ideas
+
+---
+
+# 🔭 Roadmap
+
+- Actionable agents (code edits, document updates)
+- Better clustering (embedding-based)
+- Additional policies (genetic, evolutionary)
+- Visualization of hypothesis evolution
+
+---
+
+# ⚠️ Notes
+
+- LLM fallback is enabled  
+- Clustering is heuristic (for now)  
+- Agents reason, not act (yet)  
+
+---

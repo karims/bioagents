@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from bioagents.core.config import RuntimeConfig
+from bioagents.datasources.registry import load_data
 
 
 @dataclass
@@ -32,7 +33,7 @@ def load_task(input_file: Path) -> Task:
     return Task(
         task_type=payload.get("task_type", payload.get("task", "task")),
         title=payload.get("title"),
-        data=payload["data"],
+        data=load_data(payload["data"]),
         objective=payload.get("objective"),
         metadata=payload.get("metadata", {}),
         config=config,
