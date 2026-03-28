@@ -3,6 +3,7 @@ from bioagents.core.blackboard import Blackboard
 from bioagents.core.config import RuntimeConfig
 from bioagents.core.rules import ContradictRule, DecayRule, PruneRule, ReinforceOnRepeatRule
 from bioagents.registry.agents import AGENT_REGISTRY
+from bioagents.registry.policies import get_policy
 from bioagents.registry.tasks import TASK_AGENT_MAP
 from bioagents.llm.provider import Provider
 
@@ -65,4 +66,12 @@ def get_blackboard(names: list[str] | None) -> Blackboard:
 
 
 def resolve_config(config: RuntimeConfig | None) -> RuntimeConfig:
-    return config or RuntimeConfig()
+    resolved = config or RuntimeConfig()
+    policy = get_policy(resolved.policy)
+    if resolved.rules is None and policy.rules is not None:
+        resolved.rules = list(policy.rules)
+    if resolved.similarity_threshold == RuntimeConfig.similarity_threshold and policy.similarity_threshold is not None:
+        resolved.similarity_threshold = policy.similarity_threshold
+    if resolved.policy is None:
+        resolved.policy = policy.name
+    return resolved

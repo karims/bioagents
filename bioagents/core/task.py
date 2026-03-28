@@ -22,6 +22,7 @@ def load_task(input_file: Path) -> Task:
     config = None
     if config_payload is not None:
         config = RuntimeConfig(
+            policy=config_payload.get("policy"),
             agents=config_payload.get("agents"),
             rules=config_payload.get("rules"),
             max_steps=config_payload.get("max_steps", 3),

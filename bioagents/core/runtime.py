@@ -18,6 +18,7 @@ class SwarmRuntime:
     max_steps: int = 3
     top_k: int | None = None
     similarity_threshold: float = 0.85
+    policy_name: str = "default"
     board: Blackboard = field(default_factory=Blackboard)
 
     @classmethod
@@ -33,6 +34,7 @@ class SwarmRuntime:
             max_steps=resolved.max_steps,
             top_k=resolved.top_k,
             similarity_threshold=resolved.similarity_threshold,
+            policy_name=resolved.policy or "default",
             board=get_blackboard(resolved.rules),
         )
 
@@ -46,6 +48,7 @@ class SwarmRuntime:
         emit: Callable[[str], None],
     ) -> list[Hypothesis]:
         emit(f"mode={mode}")
+        emit(f"policy={self.policy_name}")
         emit(f"task_type={task.task_type}")
         if task.objective:
             emit(f"objective={task.objective}")

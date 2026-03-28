@@ -8,12 +8,14 @@ from bioagents.core.config import RuntimeConfig
 from bioagents.core.registry import get_agent, get_agents, get_blackboard, resolve_agents
 from bioagents.core.runtime import SwarmRuntime
 from bioagents.core.task import load_task
+from bioagents.registry.policies import get_policy
 
 
 def test_config_model_loads_from_task_json() -> None:
     task = load_task(Path("demos/sample_task.json"))
 
     assert task.config == RuntimeConfig(
+        policy=None,
         agents=["bug_agent", "performance_agent", "solution_agent", "strategy_agent", "critic_agent"],
         rules=["reinforce", "contradict", "decay", "prune"],
         max_steps=3,
@@ -109,3 +111,29 @@ def test_cli_similarity_threshold_overrides_config() -> None:
     )
 
     assert result.exit_code == 0
+
+
+def test_default_policy_loads() -> None:
+    policy = get_policy("default")
+
+    assert policy.name == "default"
+    assert policy.rules == ["reinforce", "contradict", "decay", "prune"]
+
+
+def test_config_policy_is_applied() -> None:
+    runtime = SwarmRuntime.from_config(
+        RuntimeConfig(policy="default"),
+        task_type="pr_review",
+        provider=None,
+    )
+
+    assert runtime.policy_name == "default"
+
+
+def test_cli_policy_override_works() -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(app, ["run", "demos/sample_task.json", "--policy", "default", "--top-k", "1"])
+
+    assert result.exit_code == 0
+    assert "policy=default" in result.stdout
