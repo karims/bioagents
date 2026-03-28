@@ -15,7 +15,7 @@ def test_config_model_loads_from_task_json() -> None:
     task = load_task(Path("demos/sample_task.json"))
 
     assert task.config == RuntimeConfig(
-        policy=None,
+        policy="default",
         agents=["bug_agent", "performance_agent", "solution_agent", "strategy_agent", "critic_agent"],
         rules=["reinforce", "contradict", "decay", "prune"],
         max_steps=3,
@@ -120,6 +120,13 @@ def test_default_policy_loads() -> None:
     assert policy.rules == ["reinforce", "contradict", "decay", "prune"]
 
 
+def test_all_builtin_policy_names_resolve() -> None:
+    assert get_policy("default").name == "default"
+    assert get_policy("ant").name == "ant"
+    assert get_policy("bee").name == "bee"
+    assert get_policy("immune").name == "immune"
+
+
 def test_ant_policy_loads() -> None:
     policy = get_policy("ant")
 
@@ -153,6 +160,17 @@ def test_config_policy_is_applied() -> None:
     assert runtime.policy_name == "default"
 
 
+def test_config_policy_from_task_is_applied() -> None:
+    task = load_task(Path("demos/sample_task.json"))
+    runtime = SwarmRuntime.from_config(
+        task.config,
+        task_type=task.task_type,
+        provider=None,
+    )
+
+    assert runtime.policy_name == "default"
+
+
 def test_cli_policy_override_works() -> None:
     runner = CliRunner()
 
@@ -178,6 +196,15 @@ def test_cli_immune_policy_override_works() -> None:
 
     assert result.exit_code == 0
     assert "policy=immune" in result.stdout
+
+
+def test_policy_precedence_cli_overrides_config_policy() -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(app, ["run", "demos/sample_task.json", "--policy", "bee", "--top-k", "1"])
+
+    assert result.exit_code == 0
+    assert "policy=bee" in result.stdout
 
 
 def test_ant_policy_changes_rule_parameters() -> None:

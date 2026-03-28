@@ -224,7 +224,22 @@ Each run prints the active mode, task type, objective, per-agent timings, and a 
 
 ## Policies
 
- bioagents supports pluggable swarm policies. The current `default` policy preserves today’s behavior, `ant` emphasizes reinforcement and convergence on repeated strong ideas, `bee` balances exploration and refinement across the run, and `immune` emphasizes anomaly detection and stronger challenge of weak ideas.
+bioagents supports pluggable swarm policies:
+
+- `default`
+  Preserves the current baseline behavior with balanced reinforcement, contradiction, decay, and pruning.
+- `ant`
+  Emphasizes reinforcement and convergence on repeated strong ideas.
+- `bee`
+  Balances exploration early in the run with refinement later.
+- `immune`
+  Emphasizes anomaly detection and stronger challenge of weak ideas.
+
+Example:
+
+```bash
+bioagents run demos/sample_task.json --policy ant
+```
 
 ---
 

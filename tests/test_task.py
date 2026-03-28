@@ -12,7 +12,7 @@ def test_load_task_from_json() -> None:
     assert task.title == "Null-safe email access in user scan"
     assert "profile.email" in task.data
     assert task.config == RuntimeConfig(
-        policy=None,
+        policy="default",
         agents=["bug_agent", "performance_agent", "solution_agent", "strategy_agent", "critic_agent"],
         rules=["reinforce", "contradict", "decay", "prune"],
         max_steps=3,
