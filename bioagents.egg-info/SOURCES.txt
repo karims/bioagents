@@ -35,6 +35,7 @@ bioagents/policies/ant.py
 bioagents/policies/base.py
 bioagents/policies/bee.py
 bioagents/policies/default.py
+bioagents/policies/immune.py
 bioagents/registry/__init__.py
 bioagents/registry/agents.py
 bioagents/registry/policies.py

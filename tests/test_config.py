@@ -135,6 +135,14 @@ def test_bee_policy_loads() -> None:
     assert policy.rules == ["reinforce", "contradict", "decay", "prune"]
 
 
+def test_immune_policy_loads() -> None:
+    policy = get_policy("immune")
+
+    assert policy.name == "immune"
+    assert policy.contradiction_penalty == 0.12
+    assert policy.prune_threshold == 0.35
+
+
 def test_config_policy_is_applied() -> None:
     runtime = SwarmRuntime.from_config(
         RuntimeConfig(policy="default"),
@@ -161,6 +169,15 @@ def test_cli_bee_policy_override_works() -> None:
 
     assert result.exit_code == 0
     assert "policy=bee" in result.stdout
+
+
+def test_cli_immune_policy_override_works() -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(app, ["run", "demos/sample_task.json", "--policy", "immune", "--top-k", "1"])
+
+    assert result.exit_code == 0
+    assert "policy=immune" in result.stdout
 
 
 def test_ant_policy_changes_rule_parameters() -> None:
@@ -206,5 +223,46 @@ def test_bee_policy_changes_execution_plan() -> None:
     assert [agent.name for agent in step_three_agents] == [
         "solution_agent",
         "strategy_agent",
+        "critic_agent",
+    ]
+
+
+def test_immune_policy_changes_rule_parameters() -> None:
+    default_board = get_blackboard(["contradict", "decay", "prune"], policy_name="default")
+    immune_board = get_blackboard(["contradict", "decay", "prune"], policy_name="immune")
+
+    assert default_board.critique_rules[0].confidence_penalty == 0.08
+    assert immune_board.critique_rules[0].confidence_penalty == 0.12
+    assert default_board.step_rules[0].decay_amount == 0.02
+    assert immune_board.step_rules[0].decay_amount == 0.03
+
+
+def test_immune_policy_strengthens_critic_effect() -> None:
+    from bioagents.core.models import CritiqueSubmission, Hypothesis
+
+    default_board = get_blackboard(["contradict"], policy_name="default")
+    immune_board = get_blackboard(["contradict"], policy_name="immune")
+
+    for board in (default_board, immune_board):
+        board.add_hypothesis(Hypothesis(text="idea", source="a", confidence=0.6))
+
+    default_board.add_critique(CritiqueSubmission(target_text="idea", source="critic"))
+    immune_board.add_critique(CritiqueSubmission(target_text="idea", source="critic"))
+
+    assert immune_board.get_all()[0].confidence < default_board.get_all()[0].confidence
+
+
+def test_immune_policy_prioritizes_anomaly_agents() -> None:
+    runtime = SwarmRuntime.from_config(
+        RuntimeConfig(policy="immune"),
+        task_type="pr_review",
+        provider=None,
+    )
+
+    step_one_agents = runtime.policy.plan_agents(runtime.agents, 0, runtime.max_steps)
+
+    assert [agent.name for agent in step_one_agents] == [
+        "bug_agent",
+        "performance_agent",
         "critic_agent",
     ]
