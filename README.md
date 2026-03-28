@@ -3,7 +3,11 @@
 
 **BioAgents** is a bio-inspired multi-agent reasoning framework where specialized agents collaborate, compete, and converge on the best insights for a given task.
 
-Instead of a single LLM response, BioAgents simulates a **team of reasoning agents** that generate, debate, and refine ideas.
+Instead of a single LLM or agent response, BioAgents simulates a **team of reasoning agents** that generate, debate, and refine ideas.
+
+BioAgents is not about generating answers.
+
+👉 It is about **evolving the best answer through competition**.
 
 ---
 
@@ -22,15 +26,21 @@ Instead of a single LLM response, BioAgents simulates a **team of reasoning agen
 
 # ⚡ Why BioAgents?
 
-Most AI systems:
-- produce a **single answer**
-- hide reasoning
-- miss alternative perspectives
+Most **AI agent systems today**:
+- produce a **single final answer**
+- hide intermediate reasoning
+- lack structured disagreement
+- do not explore alternative hypotheses
 
-BioAgents:
+BioAgents takes a different approach:
+
 - explores **multiple competing hypotheses**
-- exposes **reasoning dynamics**
+- enables **explicit collaboration and conflict**
+- models reasoning as an **evolutionary process**
 - produces **ranked, structured outputs**
+
+👉 Instead of asking *“what is the answer?”*  
+👉 BioAgents asks *“which idea survives competition?”*
 
 ---
 
@@ -45,9 +55,22 @@ BioAgents runs a **swarm loop over hypotheses**:
 5. Similar ideas are merged  
 6. Final outputs are ranked  
 
+This is inspired by biological systems:
+- Ant colonies (reinforcement)
+- Bee colonies (exploration + exploitation)
+- Immune systems (anomaly detection)
+
 ---
 
-# 🧪 Example: PR Review (Detailed)
+# 🧪 Example: PR Review
+
+## CLI Command
+
+```bash
+bioagents run demos/sample_task.json --policy bee --top-k 3
+```
+
+---
 
 ## Input
 
@@ -64,23 +87,23 @@ BioAgents runs a **swarm loop over hypotheses**:
 
 ---
 
-## Internal hypothesis evolution (simplified)
+## Internal reasoning (simplified)
 
-### Step 1 (generation)
-- bug_agent → "Possible null access on user.profile"
-- performance_agent → "N+1 query pattern due to DB call inside loop"
-- solution_agent → "Add null check before accessing profile"
-- strategy_agent → "Batch fetch profiles before loop"
+### Step 1 — Generation
+- bug_agent → null access risk
+- performance_agent → N+1 query issue
+- solution_agent → add null checks
+- strategy_agent → batch fetch profiles
 
-### Step 2 (interaction)
-- critic_agent rejects weak wording
-- performance_agent reinforces N+1 issue
+### Step 2 — Interaction
+- critic_agent challenges weak hypotheses
+- performance_agent reinforces DB issue
 - strategy_agent supports batching approach
 
-### Step 3 (refinement)
+### Step 3 — Refinement
 - duplicate ideas merged
 - weak hypotheses decay
-- strong ones accumulate support
+- strong hypotheses accumulate support
 
 ---
 
@@ -108,77 +131,54 @@ BioAgents runs a **swarm loop over hypotheses**:
 
 ---
 
-# 🤔 Why not just use GPT?
+# 🤔 Why not just use a single LLM or agent?
 
-You could ask a single LLM:
+### ❌ Traditional approach
+- One agent → one answer
+- No internal disagreement
+- No refinement loop
+- Limited exploration
 
-> "Review this PR"
+### ✅ BioAgents approach
+- Multiple agents → multiple hypotheses
+- Explicit **support vs contradiction**
+- Iterative refinement
+- Structured ranking
 
-But that has limitations:
-
-### ❌ Single-shot reasoning
-- One answer
-- No internal competition
-- No refinement
-
-### ❌ Hidden tradeoffs
-- Doesn’t show alternatives
-- No explicit disagreement
-
-### ❌ No structured evolution
-- No reinforcement or decay
-- No idea merging
-
----
-
-### ✅ What BioAgents does differently
-
-- Generates **multiple competing hypotheses**
-- Forces **agents to challenge each other**
-- Uses **rules (reinforce / contradict / decay / prune)**
-- Produces **ranked outputs instead of one answer**
-
-👉 It turns reasoning into a **search problem over ideas**
-
----
-
-# 🧠 Task Format
-
-```json
-{
-  "task_type": "pr_review",
-  "data": "...",
-  "objective": "...",
-  "config": {
-    "top_k": 2
-  }
-}
-```
+👉 This turns reasoning into a **search problem over ideas**
 
 ---
 
 # 🧬 Policies
 
+BioAgents supports pluggable reasoning strategies:
+
 | Policy  | Behavior |
 |--------|--------|
-| default | Balanced |
-| ant     | Convergence |
+| default | Balanced reasoning |
+| ant     | Converges via reinforcement |
 | bee     | Explore → refine |
-| immune  | Anomaly detection |
+| immune  | Focus on anomalies |
+
+Example:
 
 ```bash
-bioagents run demos/sample_task.json --policy bee
+bioagents run demos/sample_task.json --policy ant
 ```
 
 ---
 
-# 🧱 Core Concepts
+# 📚 More Examples
 
-- Agents → reasoning roles  
-- Hypotheses → competing ideas  
-- Blackboard → shared state  
-- Rules → reinforce / contradict / decay / prune  
-- Clustering → merge duplicates  
+We are adding more domain-specific examples in:
+
+👉 `EXAMPLES.md`
+
+Planned domains:
+- Code review
+- Incident analysis
+- Product reasoning
+- Strategy exploration
 
 ---
 
@@ -193,35 +193,29 @@ bioagents run demos/sample_task.json --policy bee
 
 ---
 
-# 🧪 Development
+# 🧱 Core Concepts
 
-```bash
-python -m pip install -e '.[dev]'
-pytest
-```
+- **Agents** → reasoning roles (bug, strategy, solution, etc.)
+- **Hypotheses** → competing ideas
+- **Blackboard** → shared reasoning space
+- **Rules** → reinforce / contradict / decay / prune
+- **Clustering** → merge similar ideas
 
 ---
 
 # 🔭 Roadmap
 
-- Action agents (code edits)
-- Better clustering
-- More policies
-- Visualization of reasoning
+- Actionable agents (code edits, document updates)
+- Better clustering (embedding-based)
+- Additional policies (genetic, evolutionary)
+- Visualization of hypothesis evolution
 
 ---
 
 # ⚠️ Notes
 
-- LLM fallback enabled  
-- Clustering is heuristic  
+- LLM fallback is enabled  
+- Clustering is heuristic (for now)  
 - Agents reason, not act (yet)  
 
 ---
-
-# 🧠 Final Thought
-
-BioAgents is **not about generating answers**.
-
-It is about:
-👉 **evolving the best answer through competition**.
