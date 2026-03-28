@@ -10,3 +10,6 @@ class Policy:
     contradiction_penalty: float | None = None
     decay_amount: float | None = None
     prune_threshold: float | None = None
+
+    def plan_agents(self, agents: list[object], step_index: int, max_steps: int) -> list[object]:
+        return list(agents)

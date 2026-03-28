@@ -128,6 +128,13 @@ def test_ant_policy_loads() -> None:
     assert policy.decay_amount == 0.01
 
 
+def test_bee_policy_loads() -> None:
+    policy = get_policy("bee")
+
+    assert policy.name == "bee"
+    assert policy.rules == ["reinforce", "contradict", "decay", "prune"]
+
+
 def test_config_policy_is_applied() -> None:
     runtime = SwarmRuntime.from_config(
         RuntimeConfig(policy="default"),
@@ -145,6 +152,15 @@ def test_cli_policy_override_works() -> None:
 
     assert result.exit_code == 0
     assert "policy=default" in result.stdout
+
+
+def test_cli_bee_policy_override_works() -> None:
+    runner = CliRunner()
+
+    result = runner.invoke(app, ["run", "demos/sample_task.json", "--policy", "bee", "--top-k", "1"])
+
+    assert result.exit_code == 0
+    assert "policy=bee" in result.stdout
 
 
 def test_ant_policy_changes_rule_parameters() -> None:
@@ -169,3 +185,26 @@ def test_ant_policy_preserves_repeated_ideas_more_strongly() -> None:
         board.apply_step_rules()
 
     assert ant_board.get_all()[0].confidence > default_board.get_all()[0].confidence
+
+
+def test_bee_policy_changes_execution_plan() -> None:
+    runtime = SwarmRuntime.from_config(
+        RuntimeConfig(policy="bee"),
+        task_type="pr_review",
+        provider=None,
+    )
+
+    step_one_agents = runtime.policy.plan_agents(runtime.agents, 0, runtime.max_steps)
+    step_three_agents = runtime.policy.plan_agents(runtime.agents, 2, runtime.max_steps)
+
+    assert [agent.name for agent in step_one_agents] == [
+        "bug_agent",
+        "performance_agent",
+        "strategy_agent",
+        "critic_agent",
+    ]
+    assert [agent.name for agent in step_three_agents] == [
+        "solution_agent",
+        "strategy_agent",
+        "critic_agent",
+    ]

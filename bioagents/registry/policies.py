@@ -1,4 +1,5 @@
 from bioagents.policies.ant import AntPolicy
+from bioagents.policies.bee import BeePolicy
 from bioagents.policies.default import DefaultPolicy, PlaceholderPolicy
 
 
@@ -7,7 +8,7 @@ DEFAULT_POLICY_NAME = "default"
 POLICY_REGISTRY = {
     "default": DefaultPolicy,
     "ant": AntPolicy,
-    "bee": PlaceholderPolicy,
+    "bee": BeePolicy,
     "immune": PlaceholderPolicy,
 }
 

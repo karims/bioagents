@@ -224,7 +224,7 @@ Each run prints the active mode, task type, objective, per-agent timings, and a 
 
 ## Policies
 
-bioagents supports pluggable swarm policies. The current `default` policy preserves today’s behavior, and `ant` now emphasizes reinforcement and convergence on repeated strong ideas. `bee` and `immune` are reserved for future variants.
+bioagents supports pluggable swarm policies. The current `default` policy preserves today’s behavior, `ant` emphasizes reinforcement and convergence on repeated strong ideas, and `bee` balances exploration and refinement across the run. `immune` is reserved for a future variant.
 
 ---
 

@@ -10,6 +10,8 @@ from bioagents.core.registry import get_blackboard, resolve_agents, resolve_conf
 from bioagents.core.selector import HypothesisSelector
 from bioagents.core.task import Task
 from bioagents.llm.provider import Provider
+from bioagents.policies.base import Policy
+from bioagents.registry.policies import get_policy
 
 
 @dataclass
@@ -19,6 +21,7 @@ class SwarmRuntime:
     top_k: int | None = None
     similarity_threshold: float = 0.85
     policy_name: str = "default"
+    policy: Policy = field(default_factory=lambda: get_policy("default"))
     board: Blackboard = field(default_factory=Blackboard)
 
     @classmethod
@@ -29,12 +32,14 @@ class SwarmRuntime:
         provider: Provider | None = None,
     ) -> "SwarmRuntime":
         resolved = resolve_config(config)
+        policy = get_policy(resolved.policy)
         return cls(
             agents=resolve_agents(resolved, task_type, provider=provider),
             max_steps=resolved.max_steps,
             top_k=resolved.top_k,
             similarity_threshold=resolved.similarity_threshold,
-            policy_name=resolved.policy or "default",
+            policy_name=policy.name,
+            policy=policy,
             board=get_blackboard(resolved.rules, policy_name=resolved.policy),
         )
 
@@ -81,9 +86,10 @@ class SwarmRuntime:
 
         for _ in range(self.max_steps):
             step_start = perf_counter()
+            step_agents = self.policy.plan_agents(self.agents, _, self.max_steps)
             if emit is not None:
                 emit(f"step={_ + 1}")
-            for agent in self.agents:
+            for agent in step_agents:
                 agent_start = perf_counter()
                 outputs = agent.act(task, self.board)
                 agent_runtime = perf_counter() - agent_start

@@ -33,6 +33,7 @@ bioagents/llm/provider.py
 bioagents/policies/__init__.py
 bioagents/policies/ant.py
 bioagents/policies/base.py
+bioagents/policies/bee.py
 bioagents/policies/default.py
 bioagents/registry/__init__.py
 bioagents/registry/agents.py
