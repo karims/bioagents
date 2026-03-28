@@ -50,7 +50,12 @@ def get_blackboard(names: list[str] | None, policy_name: str | None = None) -> B
 
     for name in selected_names:
         if name == "reinforce":
-            rules.append(ReinforceOnRepeatRule(confidence_bump=policy.reinforcement_bump or 0.05))
+            rules.append(
+                ReinforceOnRepeatRule(
+                    confidence_bump=policy.reinforcement_bump or 0.05,
+                    trail_increment=policy.trail_increment or 0.0,
+                )
+            )
             continue
         if name == "contradict":
             critique_rules.append(
@@ -58,7 +63,14 @@ def get_blackboard(names: list[str] | None, policy_name: str | None = None) -> B
             )
             continue
         if name == "decay":
-            step_rules.append(DecayRule(decay_amount=policy.decay_amount or 0.02))
+            step_rules.append(
+                DecayRule(
+                    decay_amount=policy.decay_amount or 0.02,
+                    trail_decay=policy.trail_decay or 0.0,
+                    novelty_decay=policy.novelty_decay or 0.0,
+                    anomaly_decay=policy.anomaly_decay or 0.0,
+                )
+            )
             continue
         if name == "prune":
             step_rules.append(PruneRule(threshold=policy.prune_threshold or 0.3))

@@ -56,4 +56,7 @@ def merge_cluster(cluster: list[Hypothesis]) -> Hypothesis:
         sources=sources,
         opposition=sum(hypothesis.opposition for hypothesis in cluster),
         critic_sources=critic_sources,
+        trail_strength=sum(hypothesis.trail_strength for hypothesis in cluster),
+        novelty_score=max(hypothesis.novelty_score for hypothesis in cluster),
+        anomaly_score=max(hypothesis.anomaly_score for hypothesis in cluster),
     )

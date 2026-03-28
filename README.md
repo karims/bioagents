@@ -229,11 +229,11 @@ bioagents supports pluggable swarm policies:
 - `default`
   Preserves the current baseline behavior with balanced reinforcement, contradiction, decay, and pruning.
 - `ant`
-  Emphasizes reinforcement and convergence on repeated strong ideas.
+  Emphasizes convergence via reinforcement trails on repeated strong ideas.
 - `bee`
   Balances exploration early in the run with refinement later.
 - `immune`
-  Emphasizes anomaly detection and stronger challenge of weak ideas.
+  Emphasizes anomaly and risk signals with stronger contradiction pressure.
 
 Example:
 

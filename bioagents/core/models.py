@@ -11,6 +11,9 @@ class Hypothesis:
     sources: list[str] = field(default_factory=list)
     opposition: int = 0
     critic_sources: list[str] = field(default_factory=list)
+    trail_strength: float = 0.0
+    novelty_score: float = 0.0
+    anomaly_score: float = 0.0
 
     def __post_init__(self) -> None:
         if not self.sources:

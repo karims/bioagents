@@ -12,6 +12,10 @@ class DefaultPolicy(Policy):
     contradiction_penalty: float = 0.08
     decay_amount: float = 0.02
     prune_threshold: float = 0.3
+    trail_increment: float = 0.02
+    trail_decay: float = 0.02
+    novelty_decay: float = 0.04
+    anomaly_decay: float = 0.02
 
     def __post_init__(self) -> None:
         if self.rules is None:
@@ -27,6 +31,10 @@ class PlaceholderPolicy(Policy):
     contradiction_penalty: float = 0.08
     decay_amount: float = 0.02
     prune_threshold: float = 0.3
+    trail_increment: float = 0.02
+    trail_decay: float = 0.02
+    novelty_decay: float = 0.04
+    anomaly_decay: float = 0.02
 
     def __post_init__(self) -> None:
         if self.rules is None:

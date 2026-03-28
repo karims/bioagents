@@ -213,6 +213,7 @@ def test_ant_policy_changes_rule_parameters() -> None:
 
     assert default_board.rules[0].confidence_bump == 0.05
     assert ant_board.rules[0].confidence_bump == 0.08
+    assert ant_board.rules[0].trail_increment > default_board.rules[0].trail_increment
     assert default_board.step_rules[0].decay_amount == 0.02
     assert ant_board.step_rules[0].decay_amount == 0.01
 
@@ -229,6 +230,7 @@ def test_ant_policy_preserves_repeated_ideas_more_strongly() -> None:
         board.apply_step_rules()
 
     assert ant_board.get_all()[0].confidence > default_board.get_all()[0].confidence
+    assert ant_board.get_all()[0].trail_strength > default_board.get_all()[0].trail_strength
 
 
 def test_bee_policy_changes_execution_plan() -> None:
@@ -254,6 +256,19 @@ def test_bee_policy_changes_execution_plan() -> None:
     ]
 
 
+def test_bee_policy_preserves_early_novelty_and_late_refinement() -> None:
+    from bioagents.core.models import Hypothesis
+
+    runtime = SwarmRuntime.from_config(RuntimeConfig(policy="bee"), task_type="pr_review", provider=None)
+    novelty = Hypothesis(text="novel", source="bug_agent")
+    refinement = Hypothesis(text="refine", source="solution_agent")
+    runtime.policy.prepare_hypothesis(novelty, "bug_agent", 0, runtime.max_steps)
+    runtime.policy.prepare_hypothesis(refinement, "solution_agent", runtime.max_steps - 1, runtime.max_steps)
+
+    assert novelty.novelty_score > 0.0
+    assert refinement.trail_strength > 0.0
+
+
 def test_immune_policy_changes_rule_parameters() -> None:
     default_board = get_blackboard(["contradict", "decay", "prune"], policy_name="default")
     immune_board = get_blackboard(["contradict", "decay", "prune"], policy_name="immune")
@@ -277,6 +292,16 @@ def test_immune_policy_strengthens_critic_effect() -> None:
     immune_board.add_critique(CritiqueSubmission(target_text="idea", source="critic"))
 
     assert immune_board.get_all()[0].confidence < default_board.get_all()[0].confidence
+
+
+def test_immune_policy_assigns_anomaly_score_to_risk_agents() -> None:
+    from bioagents.core.models import Hypothesis
+
+    runtime = SwarmRuntime.from_config(RuntimeConfig(policy="immune"), task_type="pr_review", provider=None)
+    hypothesis = Hypothesis(text="risk", source="bug_agent")
+    runtime.policy.prepare_hypothesis(hypothesis, "bug_agent", 0, runtime.max_steps)
+
+    assert hypothesis.anomaly_score > 0.0
 
 
 def test_immune_policy_prioritizes_anomaly_agents() -> None:

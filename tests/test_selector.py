@@ -1,3 +1,6 @@
+from bioagents.policies.ant import AntPolicy
+from bioagents.policies.bee import BeePolicy
+from bioagents.policies.immune import ImmunePolicy
 from bioagents.core.models import Hypothesis
 from bioagents.core.selector import HypothesisSelector
 
@@ -92,3 +95,36 @@ def test_clustering_is_more_conservative_for_low_overlap_phrases() -> None:
     ranked = HypothesisSelector(similarity_threshold=0.6).select(hypotheses)
 
     assert len(ranked) == 2
+
+
+def test_ant_policy_ranks_by_trail_strength() -> None:
+    hypotheses = [
+        Hypothesis(text="high_conf", source="a", confidence=0.9, trail_strength=0.1),
+        Hypothesis(text="strong_trail", source="b", confidence=0.6, trail_strength=0.5),
+    ]
+
+    ranked = HypothesisSelector(policy=AntPolicy()).rank(hypotheses)
+
+    assert [hypothesis.text for hypothesis in ranked] == ["strong_trail", "high_conf"]
+
+
+def test_bee_policy_values_novelty_signal() -> None:
+    hypotheses = [
+        Hypothesis(text="novel", source="a", confidence=0.5, novelty_score=0.4),
+        Hypothesis(text="stable", source="b", confidence=0.52, novelty_score=0.0),
+    ]
+
+    ranked = HypothesisSelector(policy=BeePolicy()).rank(hypotheses)
+
+    assert ranked[0].text == "novel"
+
+
+def test_immune_policy_values_anomaly_signal() -> None:
+    hypotheses = [
+        Hypothesis(text="fix", source="a", confidence=0.8, anomaly_score=0.0),
+        Hypothesis(text="risk", source="b", confidence=0.5, anomaly_score=0.5),
+    ]
+
+    ranked = HypothesisSelector(policy=ImmunePolicy()).rank(hypotheses)
+
+    assert ranked[0].text == "risk"

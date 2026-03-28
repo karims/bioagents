@@ -93,6 +93,9 @@ class SwarmRuntime:
                 agent_start = perf_counter()
                 outputs = agent.act(task, self.board)
                 agent_runtime = perf_counter() - agent_start
+                for output in outputs:
+                    if isinstance(output, HypothesisSubmission):
+                        self.policy.prepare_hypothesis(output.hypothesis, agent.name, _, self.max_steps)
                 self.board.add_submissions(outputs)
                 hypotheses_generated += sum(1 for output in outputs if isinstance(output, HypothesisSubmission))
                 if emit is not None:
@@ -110,7 +113,11 @@ class SwarmRuntime:
         selector = HypothesisSelector(
             top_k=self.top_k,
             similarity_threshold=self.similarity_threshold,
+            policy=self.policy,
         )
         merged_hypotheses, clusters_formed = selector.prepare(self.board.get_all())
         ranked = selector.rank(merged_hypotheses)
+        hint = self.policy.summary_hint(ranked)
+        if emit is not None and hint is not None:
+            emit(hint)
         return ranked, perf_counter() - total_start, hypotheses_generated, clusters_formed, effective_mode

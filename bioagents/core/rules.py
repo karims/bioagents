@@ -22,12 +22,14 @@ class StepRule(Protocol):
 @dataclass
 class ReinforceOnRepeatRule:
     confidence_bump: float = 0.05
+    trail_increment: float = 0.0
 
     def apply(self, existing: Hypothesis, incoming: Hypothesis) -> None:
         existing.support += 1
         if incoming.source not in existing.sources:
             existing.sources.append(incoming.source)
         existing.confidence = min(1.0, existing.confidence + self.confidence_bump)
+        existing.trail_strength += self.trail_increment
 
 
 @dataclass
@@ -44,10 +46,16 @@ class ContradictRule:
 @dataclass
 class DecayRule:
     decay_amount: float = 0.02
+    trail_decay: float = 0.0
+    novelty_decay: float = 0.0
+    anomaly_decay: float = 0.0
 
     def apply(self, hypotheses: dict[str, Hypothesis]) -> None:
         for hypothesis in hypotheses.values():
             hypothesis.confidence = max(0.0, hypothesis.confidence - self.decay_amount)
+            hypothesis.trail_strength = max(0.0, hypothesis.trail_strength - self.trail_decay)
+            hypothesis.novelty_score = max(0.0, hypothesis.novelty_score - self.novelty_decay)
+            hypothesis.anomaly_score = max(0.0, hypothesis.anomaly_score - self.anomaly_decay)
 
 
 @dataclass
