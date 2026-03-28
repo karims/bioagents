@@ -35,7 +35,7 @@ class SwarmRuntime:
             top_k=resolved.top_k,
             similarity_threshold=resolved.similarity_threshold,
             policy_name=resolved.policy or "default",
-            board=get_blackboard(resolved.rules),
+            board=get_blackboard(resolved.rules, policy_name=resolved.policy),
         )
 
     def run(self, task: Task) -> list[Hypothesis]:

@@ -30,8 +30,13 @@ bioagents/core/task.py
 bioagents/llm/__init__.py
 bioagents/llm/prompts.py
 bioagents/llm/provider.py
+bioagents/policies/__init__.py
+bioagents/policies/ant.py
+bioagents/policies/base.py
+bioagents/policies/default.py
 bioagents/registry/__init__.py
 bioagents/registry/agents.py
+bioagents/registry/policies.py
 bioagents/registry/tasks.py
 tests/test_blackboard.py
 tests/test_config.py

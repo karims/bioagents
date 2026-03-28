@@ -120,6 +120,14 @@ def test_default_policy_loads() -> None:
     assert policy.rules == ["reinforce", "contradict", "decay", "prune"]
 
 
+def test_ant_policy_loads() -> None:
+    policy = get_policy("ant")
+
+    assert policy.name == "ant"
+    assert policy.reinforcement_bump == 0.08
+    assert policy.decay_amount == 0.01
+
+
 def test_config_policy_is_applied() -> None:
     runtime = SwarmRuntime.from_config(
         RuntimeConfig(policy="default"),
@@ -137,3 +145,27 @@ def test_cli_policy_override_works() -> None:
 
     assert result.exit_code == 0
     assert "policy=default" in result.stdout
+
+
+def test_ant_policy_changes_rule_parameters() -> None:
+    default_board = get_blackboard(["reinforce", "decay", "prune"], policy_name="default")
+    ant_board = get_blackboard(["reinforce", "decay", "prune"], policy_name="ant")
+
+    assert default_board.rules[0].confidence_bump == 0.05
+    assert ant_board.rules[0].confidence_bump == 0.08
+    assert default_board.step_rules[0].decay_amount == 0.02
+    assert ant_board.step_rules[0].decay_amount == 0.01
+
+
+def test_ant_policy_preserves_repeated_ideas_more_strongly() -> None:
+    default_board = get_blackboard(["reinforce", "decay"], policy_name="default")
+    ant_board = get_blackboard(["reinforce", "decay"], policy_name="ant")
+
+    from bioagents.core.models import Hypothesis
+
+    for board in (default_board, ant_board):
+        board.add_hypothesis(Hypothesis(text="idea", source="a", confidence=0.6))
+        board.add_hypothesis(Hypothesis(text="idea", source="a", confidence=0.6))
+        board.apply_step_rules()
+
+    assert ant_board.get_all()[0].confidence > default_board.get_all()[0].confidence

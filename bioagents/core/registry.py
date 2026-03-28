@@ -41,24 +41,27 @@ def resolve_agents(
     return [get_agent(name, provider=provider) for name in names]
 
 
-def get_blackboard(names: list[str] | None) -> Blackboard:
+def get_blackboard(names: list[str] | None, policy_name: str | None = None) -> Blackboard:
     selected_names = names or DEFAULT_RULE_NAMES
+    policy = get_policy(policy_name)
     rules = []
     critique_rules = []
     step_rules = []
 
     for name in selected_names:
         if name == "reinforce":
-            rules.append(ReinforceOnRepeatRule())
+            rules.append(ReinforceOnRepeatRule(confidence_bump=policy.reinforcement_bump or 0.05))
             continue
         if name == "contradict":
-            critique_rules.append(ContradictRule())
+            critique_rules.append(
+                ContradictRule(confidence_penalty=policy.contradiction_penalty or 0.08)
+            )
             continue
         if name == "decay":
-            step_rules.append(DecayRule())
+            step_rules.append(DecayRule(decay_amount=policy.decay_amount or 0.02))
             continue
         if name == "prune":
-            step_rules.append(PruneRule())
+            step_rules.append(PruneRule(threshold=policy.prune_threshold or 0.3))
             continue
         raise ValueError(f"Unknown rule: {name}")
 

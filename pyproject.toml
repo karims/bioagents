@@ -17,7 +17,7 @@ dev = ["pytest>=8,<9"]
 bioagents = "bioagents.cli.main:main"
 
 [tool.setuptools]
-packages = ["bioagents", "bioagents.cli", "bioagents.core", "bioagents.llm", "bioagents.agents", "bioagents.registry"]
+packages = ["bioagents", "bioagents.cli", "bioagents.core", "bioagents.llm", "bioagents.agents", "bioagents.registry", "bioagents.policies"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
