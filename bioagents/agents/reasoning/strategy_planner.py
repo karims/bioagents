@@ -3,7 +3,7 @@ from bioagents.llm.prompts import build_strategy_prompt
 from bioagents.llm.provider import Provider
 
 
-class StrategyAgent(Agent):
+class StrategyPlannerAgent(Agent):
     def __init__(self, provider: Provider | None = None):
         super().__init__(
             name="strategy_agent",

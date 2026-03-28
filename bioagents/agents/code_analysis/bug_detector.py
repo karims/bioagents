@@ -3,7 +3,7 @@ from bioagents.llm.prompts import build_bug_prompt
 from bioagents.llm.provider import Provider
 
 
-class BugAgent(Agent):
+class BugDetectorAgent(Agent):
     def __init__(self, provider: Provider | None = None):
         super().__init__(
             name="bug_agent",
